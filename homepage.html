@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerCompass - Your Career GPS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;600;800&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --light-gray: #C6C5B9;
+            --teal: #62929E;
+            --dark-teal: #4A6D7C;
+            --dark-green: #393A10;
+            --charcoal: #475657;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to bottom, var(--light-gray), #e8e8e2);
+            color: var(--charcoal);
+            overflow-x: hidden;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(90deg, var(--dark-teal), var(--teal));
+            padding: 1.8rem 5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .navbar .logo {
+            display: flex;
+            align-items: center;
+            color: var(--light-gray);
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-decoration: none;
+            /* transition: all 0.4s ease; */
+        }
+
+        /* .navbar .logo:hover {
+            transform: scale(1.1) rotate(5deg);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+        } */
+
+        .navbar .logo i {
+            margin-right: 1rem;
+            font-size: 2.2rem;
+            animation: spinCompass 10s linear infinite;
+        }
+
+        .navbar .nav-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar .nav-links a {
+            color: var(--light-gray);
+            margin-left: 3rem;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 400;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .navbar .nav-links a::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 3px;
+            bottom: -8px;
+            left: 0;
+            background: linear-gradient(90deg, var(--teal), var(--light-gray));
+            transition: width 0.4s ease;
+        }
+
+        .navbar .nav-links a:hover::before {
+            width: 100%;
+        }
+
+        .navbar .nav-links a:hover {
+            color: var(--light-gray);
+            text-shadow: 0 0 10px var(--teal);
+            transform: translateY(-2px);
+        }
+
+        .hamburger {
+            display: none;
+            font-size: 2rem;
+            color: var(--light-gray);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .hamburger:hover {
+            transform: rotate(90deg);
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            text-align: center;
+            padding: 8rem 2rem;
+            background: linear-gradient(135deg, var(--teal), var(--dark-teal));
+            color: var(--light-gray);
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #webgl-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.7;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 5rem;
+            font-weight: 900;
+            margin-bottom: 2rem;
+            animation: fadeInDown 1.5s ease-out;
+            text-shadow: 0 0 30px rgba(0, 0, 0, 0.5), 0 0 10px var(--teal);
+        }
+
+        .hero p {
+            font-size: 1.6rem;
+            font-weight: 200;
+            margin-bottom: 3rem;
+            animation: fadeInUp 1.5s ease-out 0.5s;
+            animation-fill-mode: backwards;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, var(--dark-green), var(--teal));
+            color: var(--light-gray);
+            padding: 1.2rem 4rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
+            transition: all 0.5s ease;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        /* User Profile Section */
+        .user-profile {
+            max-width: 1200px;
+            margin: 5rem auto;
+            padding: 3rem;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(145deg, #fff, var(--light-gray));
+            border-radius: 25px;
+            box-shadow: 0 0 50px rgba(98, 146, 158, 0.4);
+            position: relative;
+            animation: glow 4s ease-in-out infinite alternate;
+            transition: transform 0.4s ease;
+        }
+
+        .user-profile:hover {
+            transform: translateY(-10px);
+        }
+
+        .user-profile .profile-pic {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--teal), var(--dark-teal));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2rem;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s ease;
+        }
+
+        .user-profile .profile-pic:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 30px rgba(98, 146, 158, 0.6);
+        }
+
+        .user-profile .profile-pic img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-profile .profile-details {
+            flex: 1;
+        }
+
+        .user-profile .profile-details h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            color: var(--dark-teal);
+            margin-bottom: 1.5rem;
+        }
+
+        .typewriter {
+            display: inline-block;
+            overflow: hidden;
+            border-right: 3px solid var(--teal);
+            white-space: nowrap;
+            animation: typing 3s steps(20, end) forwards, blink 0.75s step-end infinite;
+        }
+
+        .user-profile .profile-details p {
+            font-size: 1.2rem;
+            color: var(--charcoal);
+            margin-bottom: 0.7rem;
+            font-weight: 200;
+            position: relative;
+            padding-left: 1rem;
+        }
+
+        .user-profile .profile-details p::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--teal);
+        }
+
+        .user-profile .profile-details .edit-profile {
+            margin-top: 2rem;
+            color: var(--teal);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 0.5rem 1.5rem;
+            border: 2px solid var(--teal);
+            border-radius: 25px;
+            transition: all 0.4s ease;
+        }
+
+        .user-profile .profile-details .edit-profile:hover {
+            background: var(--teal);
+            color: var(--light-gray);
+            box-shadow: 0 0 15px rgba(98, 146, 158, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Dashboard Section */
+        .dashboard {
+            max-width: 1200px;
+            margin: 5rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+        }
+
+        .card {
+            background: linear-gradient(145deg, #fff, var(--light-gray));
+            border-radius: 25px;
+            padding: 3rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, var(--teal), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .card:hover::before {
+            opacity: 0.15;
+        }
+
+        .card:hover {
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .card i {
+            font-size: 4rem;
+            color: var(--teal);
+            margin-bottom: 2rem;
+            transition: all 0.4s ease;
+        }
+
+        .card:hover i {
+            transform: scale(1.3);
+            filter: drop-shadow(0 0 15px rgba(98, 146, 158, 0.7));
+        }
+
+        .card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            color: var(--dark-teal);
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .card p {
+            font-size: 1.1rem;
+            color: var(--charcoal);
+            font-weight: 200;
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(90deg, var(--dark-green), var(--charcoal));
+            color: var(--light-gray);
+            text-align: center;
+            padding: 3rem;
+            margin-top: 5rem;
+            font-size: 1.1rem;
+            position: relative;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, var(--teal), var(--light-gray));
+            animation: gradientFlow 5s linear infinite;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 20px rgba(98, 146, 158, 0.3); }
+            to { box-shadow: 0 0 60px rgba(98, 146, 158, 0.6); }
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+        @keyframes spinCompass {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1.5rem 3rem;
+                flex-wrap: wrap;
+            }
+
+            .navbar .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                margin-top: 1rem;
+                background: var(--dark-teal);
+                padding: 1rem;
+                border-radius: 10px;
+            }
+
+            .navbar .nav-links.active {
+                display: flex;
+            }
+
+            .navbar .nav-links a {
+                margin: 0.5rem 0;
+                font-size: 1.1rem;
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 3rem;
+            }
+
+            .hero p {
+                font-size: 1.3rem;
+            }
+
+            .user-profile {
+                flex-direction: column;
+                text-align: center;
+                padding: 2rem;
+            }
+
+            .user-profile .profile-pic {
+                margin: 2rem 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 2rem;
+            }
+
+            .hero {
+                padding: 5rem 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="#" class="logo">
+            <i class="fa-regular fa-compass"></i>
+            CareerCompass
+        </a>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#skills">Skills Assessment</a>
+            <a href="#roadmap">Roadmap</a>
+            <a href="#resources">Resources</a>
+            <a href="#profile">Profile</a>
+        </div>
+        <div class="hamburger">
+            <i class="fas fa-bars"></i>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <canvas id="webgl-canvas"></canvas>
+        <div class="hero-content">
+            <h1>Discover Your Career Destiny!</h1>
+            <p>Chart a personalized path to your dream career with expert guidance and curated resources.</p>
+            <button class="cta-button" onclick="startJourney()">Begin Your Journey</button>
+        </div>
+    </section>
+
+    <!-- User Profile Section -->
+    <section class="user-profile" data-tilt>
+        <div class="profile-pic">
+            <img src="https://via.placeholder.com/180" alt="User Profile Photo">
+        </div>
+        <div class="profile-details">
+            <h2><span class="typewriter">Welcome, Riya!</span></h2>
+            <p><strong>Goal:</strong> Exploring Career Options</p>
+            <p><strong>Current Level:</strong> Intermediate</p>
+            <p><strong>Progress:</strong> 35% to Next Milestone</p>
+            <p><strong>Last Active:</strong> April 10, 2025</p>
+            <a href="#edit-profile" class="edit-profile">Edit Profile</a>
+        </div>
+    </section>
+
+    <!-- Dashboard Section -->
+    <section class="dashboard">
+        <div class="card" data-tilt>
+            <i class="fas fa-clipboard-check"></i>
+            <h3>Assess Your Skills</h3>
+            <p>Discover your strengths with quizzes and portfolio reviews for any career path.</p>
+        </div>
+        <div class="card" data-tilt>
+            <i class="fas fa-map-signs"></i>
+            <h3>Personalized Roadmap</h3>
+            <p>Get a tailored plan to guide you to your chosen profession.</p>
+        </div>
+        <div class="card" data-tilt>
+            <i class="fas fa-book-open"></i>
+            <h3>Curated Resources</h3>
+            <p>Access top learning materials for any career, all in one place.</p>
+        </div>
+        <div class="card" data-tilt>
+            <i class="fas fa-chart-line"></i>
+            <h3>Track Your Progress</h3>
+            <p>Monitor milestones and stay motivated toward your dream career.</p>
+        </div>
+        <div class="card" data-tilt>
+            <i class="fas fa-robot"></i>
+            <h3>AI-Powered Mentor</h3>
+            <p>Receive personalized guidance from an intelligent mentor tailored to your goals.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2025 CareerCompass. Your guide to every career horizon.</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js"></script>
+    <script>
+        // WebGL Particle System
+        const canvas = document.getElementById('webgl-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.position.z = 50;
+
+        const particleCount = 1000;
+        const particles = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const velocities = new Float32Array(particleCount * 3);
+
+        for (let i = 0; i < particleCount * 3; i += 3) {
+            positions[i] = (Math.random() - 0.5) * 100;
+            positions[i + 1] = (Math.random() - 0.5) * 100;
+            positions[i + 2] = (Math.random() - 0.5) * 100;
+            velocities[i] = (Math.random() - 0.5) * 0.1;
+            velocities[i + 1] = (Math.random() - 0.5) * 0.1;
+            velocities[i + 2] = (Math.random() - 0.5) * 0.1;
+        }
+
+        particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const particleMaterial = new THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 0.5,
+            transparent: true,
+            opacity: 0.6,
+        });
+        const particleSystem = new THREE.Points(particles, particleMaterial);
+        scene.add(particleSystem);
+
+        function animateParticles() {
+            requestAnimationFrame(animateParticles);
+            const positions = particleSystem.geometry.attributes.position.array;
+            for (let i = 0; i < particleCount * 3; i += 3) {
+                positions[i] += velocities[i];
+                positions[i + 1] += velocities[i + 1];
+                positions[i + 2] += velocities[i + 2];
+                if (Math.abs(positions[i]) > 50) velocities[i] *= -1;
+                if (Math.abs(positions[i + 1]) > 50) velocities[i + 1] *= -1;
+                if (Math.abs(positions[i + 2]) > 50) velocities[i + 2] *= -1;
+            }
+            particleSystem.geometry.attributes.position.needsUpdate = true;
+            renderer.render(scene, camera);
+        }
+        animateParticles();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Hamburger Menu Toggle
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        hamburger.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            hamburger.querySelector('i').classList.toggle('fa-bars');
+            hamburger.querySelector('i').classList.toggle('fa-times');
+        });
+
+        // Vanilla Tilt for 3D effect
+        VanillaTilt.init(document.querySelectorAll('[data-tilt]'), {
+            max: 15,
+            speed: 400,
+            glare: true,
+            'max-glare': 0.3,
+        });
+
+        // Start Journey
+        function startJourney() {
+            alert("Riya, your adventure to your dream career begins now!");
+            window.location.href = "#skills";
+        }
+
+        // Smooth Scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+                if (window.innerWidth <= 768) {
+                    navLinks.classList.remove('active');
+                    hamburger.querySelector('i').classList.add('fa-bars');
+                    hamburger.querySelector('i').classList.remove('fa-times');
+                }
+            });
+        });
+
+        // Card Animation on Scroll
+        const cards = document.querySelectorAll('.card');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0) scale(1)';
+                    entry.target.style.transitionDelay = `${index * 0.15}s`;
+                }
+            });
+        }, { threshold: 0.3 });
+
+        cards.forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(40px) scale(0.95)';
+            card.style.transition = 'all 0.7s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

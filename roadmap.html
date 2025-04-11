@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerCompass - Your Personalized Roadmap</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;600;800&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --light-gray: #C6C5B9;
+            --teal: #62929E;
+            --dark-teal: #4A6D7C;
+            --dark-green: #393A10;
+            --charcoal: #475657;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to bottom, var(--light-gray), #e8e8e2);
+            color: var(--charcoal);
+            overflow-x: hidden;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(90deg, var(--dark-teal), var(--teal));
+            padding: 1.8rem 5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .navbar .logo {
+            display: flex;
+            align-items: center;
+            color: var(--light-gray);
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-decoration: none;
+            transition: all 0.4s ease;
+        }
+
+        .navbar .logo:hover {
+            transform: scale(1.1) rotate(5deg);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+        }
+
+        .navbar .logo i {
+            margin-right: 1rem;
+            font-size: 2.2rem;
+            animation: spinCompass 10s linear infinite;
+        }
+
+        .navbar .nav-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar .nav-links a {
+            color: var(--light-gray);
+            margin-left: 3rem;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 400;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .navbar .nav-links a::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 3px;
+            bottom: -8px;
+            left: 0;
+            background: linear-gradient(90deg, var(--teal), var(--light-gray));
+            transition: width 0.4s ease;
+        }
+
+        .navbar .nav-links a:hover::before {
+            width: 100%;
+        }
+
+        .navbar .nav-links a:hover {
+            color: var(--light-gray);
+            text-shadow: 0 0 10px var(--teal);
+            transform: translateY(-2px);
+        }
+
+        .hamburger {
+            display: none;
+            font-size: 2rem;
+            color: var(--light-gray);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .hamburger:hover {
+            transform: rotate(90deg);
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            text-align: center;
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, var(--teal), var(--dark-teal));
+            color: var(--light-gray);
+            min-height: 50vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #webgl-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.7;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            animation: fadeInDown 1.5s ease-out;
+            text-shadow: 0 0 30px rgba(0, 0, 0, 0.5), 0 0 10px var(--teal);
+        }
+
+        .hero p {
+            font-size: 1.4rem;
+            font-weight: 200;
+            animation: fadeInUp 1.5s ease-out 0.5s;
+            animation-fill-mode: backwards;
+        }
+
+        /* Roadmap Form Section */
+        .roadmap-form {
+            max-width: 800px;
+            margin: 4rem auto;
+            padding: 3rem;
+            background: linear-gradient(145deg, #fff, var(--light-gray));
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .roadmap-form h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            color: var(--dark-teal);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 1.1rem;
+            color: var(--charcoal);
+            margin-bottom: 0.5rem;
+            font-weight: 400;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--teal);
+            border-radius: 10px;
+            font-size: 1rem;
+            color: var(--charcoal);
+            background: #fff;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--dark-teal);
+            box-shadow: 0 0 10px rgba(98, 146, 158, 0.5);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .submit-button {
+            background: linear-gradient(45deg, var(--dark-green), var(--teal));
+            color: var(--light-gray);
+            padding: 1rem 3rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: block;
+            margin: 2rem auto;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
+            transition: all 0.5s ease;
+        }
+
+        .submit-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .submit-button:hover::before {
+            left: 100%;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Roadmap Output Section */
+        .roadmap-output {
+            max-width: 1000px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+            display: none;
+        }
+
+        .roadmap-output.active {
+            display: block;
+        }
+
+        .roadmap-output h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            color: var(--dark-teal);
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--teal), var(--dark-teal));
+            transform: translateX(-50%);
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 3rem;
+            position: relative;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.7s ease;
+        }
+
+        .timeline-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .timeline-item:nth-child(odd) .timeline-content {
+            margin-right: 4rem;
+            text-align: right;
+        }
+
+        .timeline-item:nth-child(even) .timeline-content {
+            margin-left: 4rem;
+            text-align: left;
+        }
+
+        .timeline-content {
+            background: linear-gradient(145deg, #fff, var(--light-gray));
+            border-radius: 15px;
+            padding: 2rem;
+            width: 45%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            transition: all 0.4s ease;
+        }
+
+        .timeline-content:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(98, 146, 158, 0.4);
+        }
+
+        .timeline-content h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--dark-teal);
+            margin-bottom: 1rem;
+        }
+
+        .timeline-content p {
+            font-size: 1rem;
+            color: var(--charcoal);
+            font-weight: 200;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-content .skills,
+        .timeline-content .resources {
+            margin-top: 1rem;
+        }
+
+        .timeline-content .skills span,
+        .timeline-content .resources a {
+            display: inline-block;
+            background: var(--teal);
+            color: var(--light-gray);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            margin: 0.3rem;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-content .resources a {
+            text-decoration: none;
+        }
+
+        .timeline-content .skills span:hover,
+        .timeline-content .resources a:hover {
+            background: var(--dark-teal);
+            transform: translateY(-2px);
+        }
+
+        .timeline-dot {
+            width: 20px;
+            height: 20px;
+            background: var(--teal);
+            border: 4px solid var(--light-gray);
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item:hover .timeline-dot {
+            background: var(--dark-teal);
+            transform: translateX(-50%) scale(1.3);
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(90deg, var(--dark-green), var(--charcoal));
+            color: var(--light-gray);
+            text-align: center;
+            padding: 3rem;
+            margin-top: 5rem;
+            font-size: 1.1rem;
+            position: relative;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, var(--teal), var(--light-gray));
+            animation: gradientFlow 5s linear infinite;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spinCompass {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1.5rem 3rem;
+                flex-wrap: wrap;
+            }
+
+            .navbar .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                margin-top: 1rem;
+                background: var(--dark-teal);
+                padding: 1rem;
+                border-radius: 10px;
+            }
+
+            .navbar .nav-links.active {
+                display: flex;
+            }
+
+            .navbar .nav-links a {
+                margin: 0.5rem 0;
+                font-size: 1.1rem;
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+
+            .hero p {
+                font-size: 1.2rem;
+            }
+
+            .roadmap-form {
+                padding: 2rem;
+            }
+
+            .timeline::before {
+                left: 30px;
+            }
+
+            .timeline-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .timeline-item:nth-child(odd) .timeline-content,
+            .timeline-item:nth-child(even) .timeline-content {
+                margin: 1rem 0 0 4rem;
+                width: calc(100% - 5rem);
+                text-align: left;
+            }
+
+            .timeline-dot {
+                left: 30px;
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero {
+                padding: 4rem 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .roadmap-form h2 {
+                font-size: 2rem;
+            }
+
+            .submit-button {
+                padding: 0.8rem 2rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <i class="fa-regular fa-compass"></i>
+            CareerCompass
+        </a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/skills">Skills Assessment</a>
+            <a href="/roadmap">Roadmap</a>
+            <a href="/resources">Resources</a>
+            <a href="/profile">Profile</a>
+        </div>
+        <div class="hamburger">
+            <i class="fas fa-bars"></i>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <canvas id="webgl-canvas"></canvas>
+        <div class="hero-content">
+            <h1>Your Personalized Career Roadmap</h1>
+            <p>Design your future with a tailored plan to reach your dream career.</p>
+        </div>
+    </section>
+
+    <!-- Roadmap Form Section -->
+    <section class="roadmap-form">
+        <h2>Build Your Roadmap</h2>
+        <form id="roadmap-form">
+            <div class="form-group">
+                <label for="name">Your Name</label>
+                <input type="text" id="name" placeholder="e.g., Riya" value="Riya" required>
+            </div>
+            <div class="form-group">
+                <label for="career-goal">Dream Career</label>
+                <input type="text" id="career-goal" placeholder="e.g., Software Engineer, Designer" required>
+            </div>
+            <div class="form-group">
+                <label for="current-skills">Current Skills (comma-separated)</label>
+                <textarea id="current-skills" placeholder="e.g., HTML, CSS, Python"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="experience">Experience Level</label>
+                <select id="experience" required>
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="interests">Career Interests</label>
+                <textarea id="interests" placeholder="e.g., Web Development, Data Analysis"></textarea>
+            </div>
+            <button type="submit" class="submit-button">Generate Roadmap</button>
+        </form>
+    </section>
+
+    <!-- Roadmap Output Section -->
+    <section class="roadmap-output" id="roadmap-output">
+        <h2>Your Career Roadmap</h2>
+        <div class="timeline" id="timeline"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2025 CareerCompass. Your guide to every career horizon.</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<script>
+    // WebGL Particle System (unchanged)
+    const canvas = document.getElementById('webgl-canvas');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.position.z = 50;
+
+    const particleCount = 1000;
+    const particles = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const velocities = new Float32Array(particleCount * 3);
+
+    for (let i = 0; i < particleCount * 3; i += 3) {
+        positions[i] = (Math.random() - 0.5) * 100;
+        positions[i + 1] = (Math.random() - 0.5) * 100;
+        positions[i + 2] = (Math.random() - 0.5) * 100;
+        velocities[i] = (Math.random() - 0.5) * 0.1;
+        velocities[i + 1] = (Math.random() - 0.5) * 0.1;
+        velocities[i + 2] = (Math.random() - 0.5) * 0.1;
+    }
+
+    particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const particleMaterial = new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 0.5,
+        transparent: true,
+        opacity: 0.6,
+    });
+    const particleSystem = new THREE.Points(particles, particleMaterial);
+    scene.add(particleSystem);
+
+    function animateParticles() {
+        requestAnimationFrame(animateParticles);
+        const positions = particleSystem.geometry.attributes.position.array;
+        for (let i = 0; i < particleCount * 3; i += 3) {
+            positions[i] += velocities[i];
+            positions[i + 1] += velocities[i + 1];
+            positions[i + 2] += velocities[i + 2];
+            if (Math.abs(positions[i]) > 50) velocities[i] *= -1;
+            if (Math.abs(positions[i + 1]) > 50) velocities[i + 1] *= -1;
+            if (Math.abs(positions[i + 2]) > 50) velocities[i + 2] *= -1;
+        }
+        particleSystem.geometry.attributes.position.needsUpdate = true;
+        renderer.render(scene, camera);
+    }
+    animateParticles();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Hamburger Menu Toggle
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.nav-links');
+    hamburger.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+        hamburger.querySelector('i').classList.toggle('fa-bars');
+        hamburger.querySelector('i').classList.toggle('fa-times');
+    });
+
+    // Smooth Scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+            if (window.innerWidth <= 768) {
+                navLinks.classList.remove('active');
+                hamburger.querySelector('i').classList.add('fa-bars');
+                hamburger.querySelector('i').classList.remove('fa-times');
+            }
+        });
+    });
+
+    // Form Submission with Backend Call
+    const form = document.getElementById('roadmap-form');
+    const output = document.getElementById('roadmap-output');
+    const timeline = document.getElementById('timeline');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+            name: document.getElementById('name').value,
+            careerGoal: document.getElementById('career-goal').value,
+            currentSkills: document.getElementById('current-skills').value,
+            experience: document.getElementById('experience').value,
+            interests: document.getElementById('interests').value
+        };
+
+        try {
+            const response = await fetch('http://localhost:5000/generate-roadmap', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const roadmap = await response.json();
+
+            if (response.ok) {
+                // Clear previous timeline
+                timeline.innerHTML = '';
+
+                // Populate timeline
+                roadmap.forEach((item, index) => {
+                    const side = index % 2 === 0 ? 'left' : 'right';
+                    const html = `
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h3>${item.milestone}</h3>
+                                <p><strong>Timeframe:</strong> ${item.timeframe}</p>
+                                <p>${item.description}</p>
+                                <div class="skills">
+                                    <strong>Skills to Learn:</strong>
+                                    ${item.skills.map(skill => `<span>${skill}</span>`).join('')}
+                                </div>
+                                <div class="resources">
+                                    <strong>Resources:</strong>
+                                    ${item.resources.map(res => `<a href="${res.url}" target="_blank">${res.name}</a>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    timeline.insertAdjacentHTML('beforeend', html);
+                });
+
+                // Show output
+                output.classList.add('active');
+
+                // Animate timeline items
+                const items = document.querySelectorAll('.timeline-item');
+                items.forEach((item, index) => {
+                    setTimeout(() => {
+                        item.classList.add('visible');
+                    }, index * 200);
+                });
+
+                // Scroll to output
+                output.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                alert('Error generating roadmap: ' + roadmap.error);
+            }
+        } catch (error) {
+            alert('Failed to connect to server: ' + error.message);
+        }
+    });
+</script>
+</body>
+</html>

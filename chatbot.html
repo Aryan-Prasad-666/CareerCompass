@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerCompass - Chatbot Mentor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;600;800&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --light-gray: #C6C5B9;
+            --teal: #62929E;
+            --dark-teal: #4A6D7C;
+            --dark-green: #393A10;
+            --charcoal: #475657;
+            --accent: #FFD700;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f0ea, var(--light-gray));
+            color: var(--charcoal);
+            line-height: 1.5;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, var(--dark-teal), var(--teal));
+            padding: 1.5rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar .logo {
+            display: flex;
+            align-items: center;
+            color: var(--light-gray);
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 900;
+            text-decoration: none;
+        }
+
+        .navbar .logo i {
+            margin-right: 0.7rem;
+            font-size: 1.8rem;
+            animation: spinCompass 15s linear infinite;
+        }
+
+        .navbar .nav-links a {
+            color: var(--light-gray);
+            margin-left: 2rem;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .navbar .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .hamburger {
+            display: none;
+            font-size: 1.6rem;
+            color: var(--light-gray);
+            cursor: pointer;
+        }
+
+        .chatbot-container {
+            max-width: 850px;
+            margin: 2rem auto;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(45deg, var(--teal), var(--dark-teal));
+            padding: 1.2rem;
+            text-align: center;
+            color: var(--light-gray);
+        }
+
+        .chat-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .chat-header p {
+            font-size: 0.9rem;
+            font-weight: 200;
+        }
+
+        .chat-window {
+            height: 450px;
+            padding: 1.5rem;
+            background: #fafafa;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin: 0.8rem 0;
+            padding: 0.8rem 1.2rem;
+            border-radius: 12px;
+            max-width: 75%;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            position: relative;
+            white-space: pre-wrap; /* Preserve newlines for bullet points */
+        }
+
+        .user-message {
+            background: var(--teal);
+            color: var(--light-gray);
+            margin-left: auto;
+            border-top-left-radius: 0;
+            box-shadow: 0 2px 8px rgba(98, 146, 158, 0.3);
+        }
+
+        /* .user-message::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -10px;
+            border: 10px solid transparent;
+            border-top: 10px solid var(--teal);
+        } */
+
+        .bot-message {
+            background: #fff;
+            color: var(--charcoal);
+            border: 1px solid var(--dark-teal);
+            margin-right: auto;
+            border-top-right-radius: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* .bot-message::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -10px;
+            border: 10px solid transparent;
+            border-right: 10px solid var(--dark-teal);
+        } */
+
+        .user-message::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    right: -10px;
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 10px solid var(--teal);
+}
+
+.bot-message::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: -10px;
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: 10px solid var(--dark-teal);
+}
+
+
+        .chat-input-area {
+            display: flex;
+            padding: 1rem;
+            background: #fff;
+            border-top: 1px solid var(--light-gray);
+        }
+
+        #chat-input {
+            flex: 1;
+            padding: 0.7rem 1rem;
+            border: 2px solid var(--teal);
+            border-radius: 20px;
+            font-size: 0.95rem;
+            margin-right: 0.8rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--dark-teal);
+        }
+
+        .send-btn, .voice-btn {
+            background: var(--teal);
+            color: var(--light-gray);
+            padding: 0.7rem 1.2rem;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-left: 0.5rem;
+        }
+
+        .send-btn:hover, .voice-btn:hover {
+            background: var(--dark-teal);
+        }
+
+        .voice-btn.active {
+            background: var(--accent);
+            color: var(--charcoal);
+        }
+
+        .footer {
+            background: linear-gradient(90deg, var(--dark-green), var(--charcoal));
+            color: var(--light-gray);
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        @keyframes spinCompass {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem 2rem;
+            }
+
+            .navbar .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                background: var(--dark-teal);
+                padding: 1rem;
+            }
+
+            .navbar .nav-links.active {
+                display: flex;
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .chatbot-container {
+                margin: 1rem;
+            }
+
+            .chat-window {
+                height: 350px;
+            }
+
+            .message {
+                max-width: 80%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <i class="fa-regular fa-compass"></i>
+            CareerCompass
+        </a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/skills">Skills Assessment</a>
+            <a href="/roadmap">Roadmap</a>
+            <a href="/resources">Resources</a>
+            <a href="/profile">Profile</a>
+        </div>
+        <div class="hamburger">
+            <i class="fas fa-bars"></i>
+        </div>
+    </nav>
+
+    <section class="chatbot-container">
+        <div class="chat-header">
+            <h1>Your Career Mentor</h1>
+            <p>Get quick career tips!</p>
+        </div>
+        <div class="chat-window" id="chat-window">
+            <div class="message bot-message">
+              Hey! I’m here to help with short, actionable career advice. What’s on your mind?
+            </div>
+          </div>
+          
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Ask me anything...">
+            <button class="send-btn" onclick="sendMessage()">Send</button>
+            <button class="voice-btn" id="voice-btn" onclick="toggleVoice()">
+                <i class="fas fa-microphone"></i>
+            </button>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>© 2025 CareerCompass. Guiding you to success.</p>
+    </footer>
+
+    <script>
+        const chatWindow = document.getElementById('chat-window');
+        const chatInput = document.getElementById('chat-input');
+        const voiceBtn = document.getElementById('voice-btn');
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        let isListening = false;
+
+        // Navbar Toggle
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        hamburger.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            hamburger.querySelector('i').classList.toggle('fa-bars');
+            hamburger.querySelector('i').classList.toggle('fa-times');
+        });
+
+        // Add Message
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', isUser ? 'user-message' : 'bot-message');
+            messageDiv.textContent = content;
+            chatWindow.appendChild(messageDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        // Send Message
+        async function sendMessage() {
+            const query = chatInput.value.trim();
+            if (!query) return;
+
+            addMessage(query, true);
+            chatInput.value = '';
+
+            try {
+                const response = await fetch('http://localhost:5000/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    addMessage(data.response);
+                } else {
+                    addMessage('Error: ' + data.error);
+                }
+            } catch (error) {
+                addMessage('Server error: ' + error.message);
+            }
+        }
+
+        // Voice Input
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            chatInput.value = transcript;
+            sendMessage();
+        };
+
+        recognition.onend = () => {
+            isListening = false;
+            voiceBtn.classList.remove('active');
+            voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+        };
+
+        recognition.onerror = (event) => {
+            addMessage('Voice error: ' + event.error);
+            isListening = false;
+            voiceBtn.classList.remove('active');
+            voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+        };
+
+        function toggleVoice() {
+            if (isListening) {
+                recognition.stop();
+            } else {
+                recognition.start();
+                isListening = true;
+                voiceBtn.classList.add('active');
+                voiceBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+            }
+        }
+
+        // Event Listeners
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>
