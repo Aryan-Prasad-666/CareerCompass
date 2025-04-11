@@ -1,15 +1,22 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from dotenv import load_dotenv
 import google.generativeai as genai
 import json
 import re
+import os
+
+# Load environment variables from .env
+load_dotenv()
 
 app = Flask(__name__)
-CORS(app)  # Allow all origins (adjust for production)
+CORS(app)
 
-GEMINI_API_KEY = "AIzaSyC091ugGr5LmRqVhqtGzD6WVbndIMuASSE"
+# Get the Gemini API key from environment variables
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-2.0-flash")  # Using a known valid model
+model = genai.GenerativeModel("gemini-2.0-flash")
+
 
 @app.route('/generate-roadmap', methods=['POST'])
 def generate_roadmap():
