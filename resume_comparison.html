@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerCompass - Resume Comparison</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;600;800&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --light-gray: #C6C5B9;
+            --teal: #62929E;
+            --dark-teal: #4A6D7C;
+            --dark-green: #393A10;
+            --charcoal: #475657;
+            --accent: #FFD700;
+            --soft-white: #F9FAFB;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--soft-white), var(--light-gray));
+            color: var(--charcoal);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, var(--dark-teal), var(--teal));
+            padding: 1.5rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar .logo {
+            display: flex;
+            align-items: center;
+            color: var(--light-gray);
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            text-decoration: none;
+        }
+
+        .navbar .logo i {
+            margin-right: 0.8rem;
+            font-size: 2rem;
+            animation: spinCompass 15s linear infinite;
+        }
+
+        .navbar .nav-links a {
+            color: var(--light-gray);
+            margin-left: 2.5rem;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+
+        .navbar .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .hamburger {
+            display: none;
+            font-size: 1.8rem;
+            color: var(--light-gray);
+            cursor: pointer;
+        }
+
+        main {
+            flex: 1 0 auto;
+        }
+
+        .comparison-container {
+            max-width: 1100px;
+            margin: 3rem auto;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+        }
+
+        .comparison-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .comparison-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            color: var(--dark-teal);
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .comparison-header p {
+            font-size: 1.1rem;
+            color: var(--charcoal);
+            font-weight: 300;
+        }
+
+        .upload-area {
+            text-align: center;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .upload-area input[type="file"] {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(45deg, var(--teal), var(--dark-teal));
+            color: var(--light-gray);
+            padding: 1rem 2.5rem;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin: 0.5rem 0;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(98, 146, 158, 0.4);
+        }
+
+        .compare-btn {
+            background: linear-gradient(45deg, var(--dark-green), var(--teal));
+            color: var(--light-gray);
+            padding: 1rem 2.5rem;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .compare-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(57, 58, 16, 0.4);
+        }
+
+        .comparison-status {
+            font-size: 1rem;
+            color: var(--dark-teal);
+            font-weight: 500;
+            display: none;
+            background: rgba(98, 146, 158, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            width: fit-content;
+        }
+
+        .comparison-status.active {
+            display: block;
+        }
+
+        .results {
+            display: none;
+            margin-top: 2.5rem;
+            padding: 2rem;
+            background: var(--soft-white);
+            border-radius: 15px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .comparison-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .comparison-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.7rem;
+            color: var(--dark-teal);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--teal);
+            padding-bottom: 0.3rem;
+        }
+
+        .chart-container {
+            width: 600px;
+            margin: 1rem auto;
+        }
+
+        .insights-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .insights-section li {
+            background: #fff;
+            padding: 1rem;
+            margin: 0.7rem 0;
+            border-radius: 12px;
+            border: 1px solid var(--teal);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+
+        .insights-section li:hover {
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            background: linear-gradient(90deg, var(--dark-green), var(--charcoal));
+            color: var(--light-gray);
+            text-align: center;
+            padding: 2rem;
+            flex-shrink: 0;
+        }
+
+        @keyframes spinCompass {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 1rem 2rem; }
+            .navbar .nav-links { display: none; flex-direction: column; width: 100%; background: var(--dark-teal); padding: 1rem; }
+            .navbar .nav-links.active { display: flex; }
+            .hamburger { display: block; }
+            .comparison-container { margin: 1.5rem; padding: 1.5rem; }
+            .chart-container { width: 100%; max-width: 400px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <i class="fa-regular fa-compass"></i>
+            CareerCompass
+        </a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/skills">Skills Assessment</a>
+            <a href="/roadmap">Roadmap</a>
+            <a href="/resume_analyzer.html">Resume Analyzer</a>
+            <a href="/progress_tracker.html">Progress Tracker</a>
+            <a href="/resume_comparison.html">Resume Comparison</a>
+        </div>
+        <div class="hamburger">
+            <i class="fas fa-bars"></i>
+        </div>
+    </nav>
+
+    <main>
+        <section class="comparison-container">
+            <div class="comparison-header">
+                <h1>Resume Comparison</h1>
+                <p>Compare your resume with a peer’s to see where you stand!</p>
+            </div>
+            <div class="upload-area">
+                <input type="file" id="user-resume-upload" accept=".pdf,.txt">
+                <label for="user-resume-upload" class="upload-btn">Upload Your Resume</label>
+                <input type="file" id="peer-resume-upload" accept=".pdf,.txt">
+                <label for="peer-resume-upload" class="upload-btn">Upload Peer Resume</label>
+                <button class="compare-btn" onclick="compareResumes()">Compare Now</button>
+                <div class="comparison-status" id="comparison-status"></div>
+            </div>
+            <div class="results" id="results">
+                <div class="comparison-section">
+                    <h2>Skill Comparison</h2>
+                    <div class="chart-container">
+                        <canvas id="skills-chart"></canvas>
+                    </div>
+                </div>
+                <div class="comparison-section">
+                    <h2>Experience Comparison</h2>
+                    <div class="chart-container">
+                        <canvas id="experience-chart"></canvas>
+                    </div>
+                </div>
+                <div class="insights-section">
+                    <h2>Insights</h2>
+                    <ul id="insights-list"></ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2025 CareerCompass. Navigate your future with confidence.</p>
+    </footer>
+
+    <script>
+        const userResumeUpload = document.getElementById('user-resume-upload');
+        const peerResumeUpload = document.getElementById('peer-resume-upload');
+        const comparisonStatus = document.getElementById('comparison-status');
+        const results = document.getElementById('results');
+        let userResumeText = '';
+        let peerResumeText = '';
+        let skillsChart, experienceChart;
+
+        // Navbar Toggle
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        hamburger.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            hamburger.querySelector('i').classList.toggle('fa-bars');
+            hamburger.querySelector('i').classList.toggle('fa-times');
+        });
+
+        // Handle User Resume Upload
+        userResumeUpload.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.type === 'application/pdf') {
+                const reader = new FileReader();
+                reader.onload = async function(event) {
+                    const typedArray = new Uint8Array(event.target.result);
+                    const pdf = await pdfjsLib.getDocument(typedArray).promise;
+                    let text = '';
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const content = await page.getTextContent();
+                        text += content.items.map(item => item.str).join(' ') + ' ';
+                    }
+                    userResumeText = text.trim();
+                    comparisonStatus.textContent = `Your Resume Uploaded: ${file.name}`;
+                    comparisonStatus.classList.add('active');
+                };
+                reader.readAsArrayBuffer(file);
+            } else if (file.type === 'text/plain') {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    userResumeText = event.target.result.trim();
+                    comparisonStatus.textContent = `Your Resume Uploaded: ${file.name}`;
+                    comparisonStatus.classList.add('active');
+                };
+                reader.readAsText(file);
+            } else {
+                alert('Please upload a PDF or TXT file for your resume.');
+                comparisonStatus.textContent = '';
+                comparisonStatus.classList.remove('active');
+            }
+        });
+
+        // Handle Peer Resume Upload
+        peerResumeUpload.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.type === 'application/pdf') {
+                const reader = new FileReader();
+                reader.onload = async function(event) {
+                    const typedArray = new Uint8Array(event.target.result);
+                    const pdf = await pdfjsLib.getDocument(typedArray).promise;
+                    let text = '';
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const content = await page.getTextContent();
+                        text += content.items.map(item => item.str).join(' ') + ' ';
+                    }
+                    peerResumeText = text.trim();
+                    comparisonStatus.textContent = `Peer Resume Uploaded: ${file.name}`;
+                    comparisonStatus.classList.add('active');
+                };
+                reader.readAsArrayBuffer(file);
+            } else if (file.type === 'text/plain') {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    peerResumeText = event.target.result.trim();
+                    comparisonStatus.textContent = `Peer Resume Uploaded: ${file.name}`;
+                    comparisonStatus.classList.add('active');
+                };
+                reader.readAsText(file);
+            } else {
+                alert('Please upload a PDF or TXT file for the peer resume.');
+                comparisonStatus.textContent = '';
+                comparisonStatus.classList.remove('active');
+            }
+        });
+
+        // Compare Resumes
+        async function compareResumes() {
+            if (!userResumeText || !peerResumeText) {
+                alert('Please upload both your resume and a peer resume.');
+                return;
+            }
+
+            comparisonStatus.textContent = 'Comparing...';
+            comparisonStatus.classList.add('active');
+
+            try {
+                const response = await fetch('http://localhost:5000/compare-resumes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_resume: userResumeText, peer_resume: peerResumeText })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayResults(data);
+                    results.classList.add('active');
+                    results.scrollIntoView({ behavior: 'smooth' });
+                    comparisonStatus.textContent = 'Comparison Complete!';
+                } else {
+                    alert('Error: ' + data.error);
+                    comparisonStatus.textContent = 'Try Again';
+                }
+            } catch (error) {
+                alert('Server error: ' + error.message);
+                comparisonStatus.textContent = 'Try Again';
+            }
+        }
+
+        // Display Results
+        function displayResults(data) {
+            // Skills Chart
+            if (skillsChart) skillsChart.destroy();
+            const skillsCtx = document.getElementById('skills-chart').getContext('2d');
+            skillsChart = new Chart(skillsCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data.skill_comparison),
+                    datasets: [
+                        {
+                            label: 'Your Score',
+                            data: Object.values(data.skill_comparison).map(v => v.user),
+                            backgroundColor: 'rgba(98, 146, 158, 0.7)',
+                            borderColor: 'rgba(98, 146, 158, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Peer Score',
+                            data: Object.values(data.skill_comparison).map(v => v.peer),
+                            backgroundColor: 'rgba(255, 215, 0, 0.7)',
+                            borderColor: 'rgba(255, 215, 0, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: 'Skill Score' } } },
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // Experience Chart
+            if (experienceChart) experienceChart.destroy();
+            const expCtx = document.getElementById('experience-chart').getContext('2d');
+            const levelToScore = { "Entry": 33, "Mid": 66, "Senior": 100 }; // Simple mapping for visualization
+            experienceChart = new Chart(expCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Experience Level'],
+                    datasets: [
+                        {
+                            label: 'Your Level',
+                            data: [levelToScore[data.experience_comparison.user.level]],
+                            backgroundColor: 'rgba(98, 146, 158, 0.7)',
+                            borderColor: 'rgba(98, 146, 158, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Peer Level',
+                            data: [levelToScore[data.experience_comparison.peer.level]],
+                            backgroundColor: 'rgba(255, 215, 0, 0.7)',
+                            borderColor: 'rgba(255, 215, 0, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            max: 100, 
+                            title: { display: true, text: 'Experience Score' },
+                            ticks: {
+                                callback: function(value) {
+                                    if (value === 33) return 'Entry';
+                                    if (value === 66) return 'Mid';
+                                    if (value === 100) return 'Senior';
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // Insights
+            const insightsList = document.getElementById('insights-list');
+            insightsList.innerHTML = '';
+            data.insights.forEach(insight => {
+                const li = document.createElement('li');
+                li.textContent = insight;
+                insightsList.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>

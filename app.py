@@ -197,5 +197,150 @@ def analyze_resume():
         }
         return jsonify(mock_analysis), 200
     
+progress_history = []
+
+@app.route('/track-progress', methods=['POST'])
+def track_progress():
+    data = request.get_json()
+    achievements = data.get('achievements', '')
+
+    if not achievements:
+        return jsonify({"error": "No achievements provided"}), 400
+
+    prompt = f"""
+    Analyze the following weekly achievements: "{achievements}".
+    Provide:
+    - "progress_score": A score (0-100) reflecting the quality and impact of the achievements.
+    - "suggestions": List 3-5 specific, actionable suggestions to improve next week's progress (e.g., ["Focus on advanced Python topics"]).
+    - "week": The current week number (infer from context or increment from previous entries).
+    Return the response in valid JSON format:
+    {{
+      "progress_score": score,
+      "suggestions": ["suggestion1", "suggestion2", ...],
+      "week": number
+    }}
+    Ensure the output is strictly valid JSON, with no extra text or markdown.
+    """
+
+    try:
+        response = model.generate_content(prompt)
+        raw_response = response.text
+        print("Raw Gemini Response (Progress):", raw_response)
+
+        json_match = re.search(r'\{.*\}', raw_response, re.DOTALL)
+        if json_match:
+            json_str = json_match.group(0)
+        else:
+            raise ValueError("No valid JSON object found in response")
+
+        try:
+            progress_data = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            json_str = json_str.replace("'", '"').strip()
+            progress_data = json.loads(json_str)
+
+        # Add week number if not provided by Gemini (simple increment)
+        if "week" not in progress_data or not isinstance(progress_data["week"], int):
+            progress_data["week"] = len(progress_history) + 1
+
+        # Store progress in memory
+        progress_history.append({
+            "week": progress_data["week"],
+            "score": progress_data["progress_score"]
+        })
+
+        # Return current progress and suggestions, plus full history
+        return jsonify({
+            "current": progress_data,
+            "history": progress_history
+        })
+
+    except Exception as e:
+        print("Error (Progress):", str(e))
+        mock_progress = {
+            "progress_score": 50,
+            "suggestions": [
+                "Try completing a small project this week.",
+                "Focus on a new skill like time management.",
+                "Review your achievements for clarity."
+            ],
+            "week": len(progress_history) + 1
+        }
+        progress_history.append({
+            "week": mock_progress["week"],
+            "score": mock_progress["progress_score"]
+        })
+        return jsonify({
+            "current": mock_progress,
+            "history": progress_history
+        }), 200
+    
+@app.route('/compare-resumes', methods=['POST'])
+def compare_resumes():
+    data = request.get_json()
+    user_resume = data.get('user_resume', '')
+    peer_resume = data.get('peer_resume', '')
+
+    if not user_resume or not peer_resume:
+        return jsonify({"error": "Both user and peer resumes are required"}), 400
+
+    prompt = f"""
+    Compare the following two resumes:
+    - User Resume: "{user_resume}"
+    - Peer Resume: "{peer_resume}"
+
+    Provide:
+    - "skill_comparison": Object comparing key skills with estimated scores (0-100) for both (e.g., {{"Python": {{"user": 85, "peer": 70}}}}).
+    - "experience_comparison": Object with experience levels ("Entry", "Mid", "Senior") and confidence scores (0-100) for both (e.g., {{"user": {{"level": "Mid", "confidence": 85}}, "peer": {{"level": "Entry", "confidence": 90}}}}).
+    - "insights": List of 3-5 actionable insights based on the comparison (e.g., ["User has stronger technical skills than peer."]).
+
+    Return the response in valid JSON format:
+    {{
+      "skill_comparison": {{"skill1": {{"user": score, "peer": score}}, ...}},
+      "experience_comparison": {{"user": {{"level": "level", "confidence": score}}, "peer": {{"level": "level", "confidence": score}}}},
+      "insights": ["insight1", "insight2", ...]
+    }}
+    Ensure the output is strictly valid JSON, with no extra text or markdown.
+    """
+
+    try:
+        response = model.generate_content(prompt)
+        raw_response = response.text
+        print("Raw Gemini Response (Resume Comparison):", raw_response)
+
+        json_match = re.search(r'\{.*\}', raw_response, re.DOTALL)
+        if json_match:
+            json_str = json_match.group(0)
+        else:
+            raise ValueError("No valid JSON object found in response")
+
+        try:
+            comparison_data = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            json_str = json_str.replace("'", '"').strip()
+            comparison_data = json.loads(json_str)
+
+        return jsonify(comparison_data)
+
+    except Exception as e:
+        print("Error (Resume Comparison):", str(e))
+        mock_comparison = {
+            "skill_comparison": {
+                "Python": {"user": 85, "peer": 70},
+                "Java": {"user": 70, "peer": 80},
+                "Teamwork": {"user": 90, "peer": 85}
+            },
+            "experience_comparison": {
+                "user": {"level": "Mid", "confidence": 85},
+                "peer": {"level": "Entry", "confidence": 90}
+            },
+            "insights": [
+                "User has stronger Python skills than peer.",
+                "Peer excels in Java—consider learning from them.",
+                "User’s experience is more advanced than peer’s."
+            ]
+        }
+        return jsonify(mock_comparison), 200
+    
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
