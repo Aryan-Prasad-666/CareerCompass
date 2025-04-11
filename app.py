@@ -125,6 +125,77 @@ def chat():
     except Exception as e:
         print("Error (Chat):", str(e))
         return jsonify({"response": "- Sorry, I couldn’t process that.\n- Try asking again!"}), 200
+    
+@app.route('/analyze-resume', methods=['POST'])
+def analyze_resume():
+    data = request.get_json()
+    resume_text = data.get('resume', '')
 
+    if not resume_text:
+        return jsonify({"error": "No resume text provided"}), 400
+
+    prompt = f"""
+    Analyze the following resume text: "{resume_text}".
+    Provide a detailed summary with:
+    - "skills": List 5-7 key skills identified (e.g., ["Python", "Project Management"]).
+    - "strengths": List 3-5 strengths based on the resume (e.g., ["Strong coding skills"]).
+    - "weaknesses": List 3-5 areas for improvement (e.g., ["Limited leadership experience"]).
+    - "career_options": List 4 potential career paths with a fit score (0-100) and a brief reason (e.g., [{{"name": "Software Engineer", "fit": 85, "reason": "Strong programming skills"}}]).
+    - "improvements": List 5 specific suggestions for resume enhancement (e.g., ["Add quantifiable achievements"]).
+    - "experience_level": Estimate experience level ("Entry", "Mid", "Senior") with a confidence score (0-100).
+    Return the response in valid JSON format:
+    {{
+      "skills": ["skill1", "skill2", ...],
+      "strengths": ["strength1", "strength2", ...],
+      "weaknesses": ["weakness1", "weakness2", ...],
+      "career_options": [{{"name": "career1", "fit": score, "reason": "reason1"}}, ...],
+      "improvements": ["suggestion1", "suggestion2", ...],
+      "experience_level": {{"level": "level", "confidence": score}}
+    }}
+    Ensure the output is strictly valid JSON, with no extra text or markdown.
+    """
+
+    try:
+        response = model.generate_content(prompt)
+        raw_response = response.text
+        print("Raw Gemini Response (Resume):", raw_response)
+
+        json_match = re.search(r'\{.*\}', raw_response, re.DOTALL)
+        if json_match:
+            json_str = json_match.group(0)
+        else:
+            raise ValueError("No valid JSON object found in response")
+
+        try:
+            analysis = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            json_str = json_str.replace("'", '"').strip()
+            analysis = json.loads(json_str)
+
+        return jsonify(analysis)
+
+    except Exception as e:
+        print("Error (Resume):", str(e))
+        mock_analysis = {
+            "skills": ["Communication", "Teamwork", "Problem Solving", "Time Management", "Adaptability"],
+            "strengths": ["Good communication", "Team collaboration", "Quick learner"],
+            "weaknesses": ["Limited technical skills", "No leadership roles", "Few projects listed"],
+            "career_options": [
+                {"name": "Project Manager", "fit": 70, "reason": "Strong teamwork skills"},
+                {"name": "Customer Support", "fit": 65, "reason": "Effective communication"},
+                {"name": "Sales Representative", "fit": 60, "reason": "Adaptability"},
+                {"name": "Junior Analyst", "fit": 55, "reason": "Problem-solving ability"}
+            ],
+            "improvements": [
+                "Add specific skills like programming languages.",
+                "Include more work experience details.",
+                "Use action verbs for impact.",
+                "Quantify achievements (e.g., 'increased sales by 20%').",
+                "Highlight any certifications."
+            ],
+            "experience_level": {"level": "Entry", "confidence": 80}
+        }
+        return jsonify(mock_analysis), 200
+    
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerCompass - Resume Analyzer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;600;800&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --light-gray: #C6C5B9;
+            --teal: #62929E;
+            --dark-teal: #4A6D7C;
+            --dark-green: #393A10;
+            --charcoal: #475657;
+            --accent: #FFD700;
+            --soft-white: #F9FAFB;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--soft-white), var(--light-gray));
+            color: var(--charcoal);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, var(--dark-teal), var(--teal));
+            padding: 1.5rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar .logo {
+            display: flex;
+            align-items: center;
+            color: var(--light-gray);
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            text-decoration: none;
+        }
+
+        .navbar .logo i {
+            margin-right: 0.8rem;
+            font-size: 2rem;
+            animation: spinCompass 15s linear infinite;
+        }
+
+        .navbar .nav-links a {
+            color: var(--light-gray);
+            margin-left: 2.5rem;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+
+        .navbar .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .hamburger {
+            display: none;
+            font-size: 1.8rem;
+            color: var(--light-gray);
+            cursor: pointer;
+        }
+
+        main {
+            flex: 1 0 auto;
+        }
+
+        .analyzer-container {
+            max-width: 1100px;
+            margin: 3rem auto;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            position: relative;
+        }
+
+        .analyzer-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .analyzer-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            color: var(--dark-teal);
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .analyzer-header p {
+            font-size: 1.1rem;
+            color: var(--charcoal);
+            font-weight: 300;
+        }
+
+        .upload-area {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem; /* Space between buttons and status */
+        }
+
+        .upload-area input[type="file"] {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(45deg, var(--teal), var(--dark-teal));
+            color: var(--light-gray);
+            padding: 1rem 2.5rem;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(98, 146, 158, 0.4);
+        }
+
+        .analyze-btn {
+            background: linear-gradient(45deg, var(--dark-green), var(--teal));
+            color: var(--light-gray);
+            padding: 1rem 2.5rem;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(57, 58, 16, 0.4);
+        }
+
+        .upload-status {
+            font-size: 1rem;
+            color: var(--dark-teal);
+            font-weight: 500;
+            display: none;
+            background: rgba(98, 146, 158, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            width: fit-content; /* Adjusts to content width */
+        }
+
+        .upload-status.active {
+            display: block; /* Block-level to force new line */
+        }
+
+        .results {
+            display: none;
+            margin-top: 2.5rem;
+            padding: 2rem;
+            background: var(--soft-white);
+            border-radius: 15px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--teal), var(--dark-teal));
+            color: var(--light-gray);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .summary-card h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .summary-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.7rem;
+            color: var(--dark-teal);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--teal);
+            padding-bottom: 0.3rem;
+        }
+
+        .summary-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .summary-section li {
+            background: #fff;
+            padding: 1rem;
+            margin: 0.7rem 0;
+            border-radius: 12px;
+            border: 1px solid var(--teal);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+
+        .summary-section li:hover {
+            transform: translateY(-2px);
+        }
+
+        .chart-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chart-container {
+            width: 450px;
+            margin: 1rem 0;
+        }
+
+        .career-chart-container {
+            width: 350px;
+        }
+
+        .footer {
+            background: linear-gradient(90deg, var(--dark-green), var(--charcoal));
+            color: var(--light-gray);
+            text-align: center;
+            padding: 2rem;
+            flex-shrink: 0;
+        }
+
+        @keyframes spinCompass {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem 2rem;
+            }
+
+            .navbar .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                background: var(--dark-teal);
+                padding: 1rem;
+            }
+
+            .navbar .nav-links.active {
+                display: flex;
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .analyzer-container {
+                margin: 1.5rem;
+                padding: 1.5rem;
+            }
+
+            .chart-container {
+                width: 100%;
+                max-width: 400px;
+            }
+
+            .career-chart-container {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <i class="fa-regular fa-compass"></i>
+            CareerCompass
+        </a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/skills">Skills Assessment</a>
+            <a href="/roadmap">Roadmap</a>
+            <a href="/chatbot">Chatbot</a>
+            <a href="/profile">Profile</a>
+        </div>
+        <div class="hamburger">
+            <i class="fas fa-bars"></i>
+        </div>
+    </nav>
+
+    <main>
+        <section class="analyzer-container">
+            <div class="analyzer-header">
+                <h1>Resume Analyzer</h1>
+                <p>Unlock your career potential with a detailed analysis!</p>
+            </div>
+            <div class="upload-area">
+                <input type="file" id="resume-upload" accept=".pdf,.txt">
+                <label for="resume-upload" class="upload-btn">Upload Resume</label>
+                <button class="analyze-btn" onclick="analyzeResume()">Analyze Now</button>
+                <div class="upload-status" id="upload-status"></div>
+            </div>
+            <div class="results" id="results">
+                <div class="summary-card">
+                    <h2>Your Career Snapshot</h2>
+                    <p id="experience-summary">Analyzing...</p>
+                </div>
+                <div class="summary-section">
+                    <h2>Key Skills</h2>
+                    <ul id="skills-list"></ul>
+                    <div class="chart-row">
+                        <div class="chart-container">
+                            <canvas id="skills-bar-chart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="skills-radar-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="summary-section">
+                    <h2>Career Options</h2>
+                    <ul id="career-options-list"></ul>
+                    <div class="chart-row">
+                        <div class="chart-container career-chart-container">
+                            <canvas id="career-pie-chart"></canvas>
+                        </div>
+                        <div class="chart-container career-chart-container">
+                            <canvas id="career-donut-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="summary-section">
+                    <h2>Strengths</h2>
+                    <ul id="strengths-list"></ul>
+                </div>
+                <div class="summary-section">
+                    <h2>Weaknesses</h2>
+                    <ul id="weaknesses-list"></ul>
+                </div>
+                <div class="summary-section">
+                    <h2>Improvements</h2>
+                    <ul id="improvements-list"></ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2025 CareerCompass. Navigate your future with confidence.</p>
+    </footer>
+
+    <script>
+        const resumeUpload = document.getElementById('resume-upload');
+        const uploadStatus = document.getElementById('upload-status');
+        const results = document.getElementById('results');
+        let resumeText = '';
+
+        // Navbar Toggle
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        hamburger.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            hamburger.querySelector('i').classList.toggle('fa-bars');
+            hamburger.querySelector('i').classList.toggle('fa-times');
+        });
+
+        // Handle File Upload
+        resumeUpload.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.type === 'application/pdf') {
+                const reader = new FileReader();
+                reader.onload = async function(event) {
+                    const typedArray = new Uint8Array(event.target.result);
+                    const pdf = await pdfjsLib.getDocument(typedArray).promise;
+                    let text = '';
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const content = await page.getTextContent();
+                        text += content.items.map(item => item.str).join(' ') + ' ';
+                    }
+                    resumeText = text.trim();
+                    uploadStatus.textContent = `File Uploaded: ${file.name}`;
+                    uploadStatus.classList.add('active');
+                };
+                reader.readAsArrayBuffer(file);
+            } else if (file.type === 'text/plain') {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    resumeText = event.target.result.trim();
+                    uploadStatus.textContent = `File Uploaded: ${file.name}`;
+                    uploadStatus.classList.add('active');
+                };
+                reader.readAsText(file);
+            } else {
+                alert('Please upload a PDF or TXT file.');
+                uploadStatus.textContent = '';
+                uploadStatus.classList.remove('active');
+            }
+        });
+
+        // Analyze Resume
+        async function analyzeResume() {
+            if (!resumeText) {
+                alert('Please upload a resume first.');
+                return;
+            }
+
+            uploadStatus.textContent = 'Analyzing...';
+            uploadStatus.classList.add('active'); // Ensure it's visible during analysis
+            try {
+                const response = await fetch('http://localhost:5000/analyze-resume', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ resume: resumeText })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayResults(data);
+                    results.classList.add('active');
+                    results.scrollIntoView({ behavior: 'smooth' });
+                    uploadStatus.textContent = 'Analysis Complete!';
+                } else {
+                    alert('Error: ' + data.error);
+                    uploadStatus.textContent = `File Uploaded: ${resumeUpload.files[0].name}`;
+                }
+            } catch (error) {
+                alert('Server error: ' + error.message);
+                uploadStatus.textContent = `File Uploaded: ${resumeUpload.files[0].name}`;
+            }
+        }
+
+        // Display Results with Charts
+        function displayResults(data) {
+            // Experience Summary
+            document.getElementById('experience-summary').textContent = 
+                `Experience Level: ${data.experience_level.level} (Confidence: ${data.experience_level.confidence}%)`;
+
+            // Skills
+            const skillsList = document.getElementById('skills-list');
+            skillsList.innerHTML = '';
+            data.skills.forEach(skill => {
+                const li = document.createElement('li');
+                li.textContent = skill;
+                skillsList.appendChild(li);
+            });
+
+            const skillsBarChart = new Chart(document.getElementById('skills-bar-chart'), {
+                type: 'bar',
+                data: {
+                    labels: data.skills,
+                    datasets: [{
+                        label: 'Skill Strength (Estimated)',
+                        data: data.skills.map(() => Math.floor(Math.random() * 40) + 60),
+                        backgroundColor: 'rgba(98, 146, 158, 0.7)',
+                        borderColor: 'rgba(98, 146, 158, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: { y: { beginAtZero: true, max: 100 } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            const skillsRadarChart = new Chart(document.getElementById('skills-radar-chart'), {
+                type: 'radar',
+                data: {
+                    labels: data.skills,
+                    datasets: [{
+                        label: 'Skill Balance',
+                        data: data.skills.map(() => Math.floor(Math.random() * 40) + 60),
+                        fill: true,
+                        backgroundColor: 'rgba(98, 146, 158, 0.2)',
+                        borderColor: 'rgba(98, 146, 158, 1)',
+                        pointBackgroundColor: 'rgba(98, 146, 158, 1)',
+                        pointBorderColor: '#fff'
+                    }]
+                },
+                options: {
+                    scales: { r: { beginAtZero: true, max: 100 } }
+                }
+            });
+
+            // Career Options
+            const careerList = document.getElementById('career-options-list');
+            careerList.innerHTML = '';
+            data.career_options.forEach(option => {
+                const li = document.createElement('li');
+                li.textContent = `${option.name} (Fit: ${option.fit}%) - ${option.reason}`;
+                careerList.appendChild(li);
+            });
+
+            const careerPieChart = new Chart(document.getElementById('career-pie-chart'), {
+                type: 'pie',
+                data: {
+                    labels: data.career_options.map(opt => opt.name),
+                    datasets: [{
+                        data: data.career_options.map(opt => opt.fit),
+                        backgroundColor: ['#62929E', '#4A6D7C', '#FFD700', '#393A10']
+                    }]
+                },
+                options: {
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            const careerDonutChart = new Chart(document.getElementById('career-donut-chart'), {
+                type: 'doughnut',
+                data: {
+                    labels: data.career_options.map(opt => opt.name),
+                    datasets: [{
+                        data: data.career_options.map(opt => opt.fit),
+                        backgroundColor: ['#62929E', '#4A6D7C', '#FFD700', '#393A10']
+                    }]
+                },
+                options: {
+                    cutout: '50%',
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // Strengths
+            const strengthsList = document.getElementById('strengths-list');
+            strengthsList.innerHTML = '';
+            data.strengths.forEach(strength => {
+                const li = document.createElement('li');
+                li.textContent = strength;
+                strengthsList.appendChild(li);
+            });
+
+            // Weaknesses
+            const weaknessesList = document.getElementById('weaknesses-list');
+            weaknessesList.innerHTML = '';
+            data.weaknesses.forEach(weakness => {
+                const li = document.createElement('li');
+                li.textContent = weakness;
+                weaknessesList.appendChild(li);
+            });
+
+            // Improvements
+            const improvementsList = document.getElementById('improvements-list');
+            improvementsList.innerHTML = '';
+            data.improvements.forEach(improvement => {
+                const li = document.createElement('li');
+                li.textContent = improvement;
+                improvementsList.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>
