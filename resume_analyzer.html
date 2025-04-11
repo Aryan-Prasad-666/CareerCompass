@@ -38,16 +38,18 @@
             min-height: 100vh;
         }
 
+        /* Navbar */
         .navbar {
             background: linear-gradient(90deg, var(--dark-teal), var(--teal));
-            padding: 1.5rem 4rem;
+            padding: 1.8rem 5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
             position: sticky;
             top: 0;
             z-index: 1000;
+            backdrop-filter: blur(5px);
         }
 
         .navbar .logo {
@@ -55,34 +57,69 @@
             align-items: center;
             color: var(--light-gray);
             font-family: 'Playfair Display', serif;
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             font-weight: 900;
             text-decoration: none;
+            transition: all 0.4s ease;
+        }
+
+        .navbar .logo:hover {
+            transform: scale(1.1) rotate(5deg);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
         }
 
         .navbar .logo i {
-            margin-right: 0.8rem;
-            font-size: 2rem;
-            animation: spinCompass 15s linear infinite;
+            margin-right: 1rem;
+            font-size: 2.2rem;
+            animation: spinCompass 10s linear infinite;
+        }
+
+        .navbar .nav-links {
+            display: flex;
+            align-items: center;
         }
 
         .navbar .nav-links a {
             color: var(--light-gray);
-            margin-left: 2.5rem;
+            margin-left: 3rem;
             text-decoration: none;
-            font-size: 1.1rem;
-            transition: color 0.3s ease;
+            font-size: 1.2rem;
+            font-weight: 400;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .navbar .nav-links a::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 3px;
+            bottom: -8px;
+            left: 0;
+            background: linear-gradient(90deg, var(--teal), var(--light-gray));
+            transition: width 0.4s ease;
+        }
+
+        .navbar .nav-links a:hover::before {
+            width: 100%;
         }
 
         .navbar .nav-links a:hover {
-            color: var(--accent);
+            color: var(--light-gray);
+            text-shadow: 0 0 10px var(--teal);
+            transform: translateY(-2px);
         }
 
         .hamburger {
             display: none;
-            font-size: 1.8rem;
+            font-size: 2rem;
             color: var(--light-gray);
             cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .hamburger:hover {
+            transform: rotate(90deg);
         }
 
         main {
@@ -270,19 +307,27 @@
 
         @media (max-width: 768px) {
             .navbar {
-                padding: 1rem 2rem;
+                padding: 1.5rem 3rem;
+                flex-wrap: wrap;
             }
 
             .navbar .nav-links {
                 display: none;
                 flex-direction: column;
                 width: 100%;
+                margin-top: 1rem;
                 background: var(--dark-teal);
                 padding: 1rem;
+                border-radius: 10px;
             }
 
             .navbar .nav-links.active {
                 display: flex;
+            }
+
+            .navbar .nav-links a {
+                margin: 0.5rem 0;
+                font-size: 1.1rem;
             }
 
             .hamburger {
@@ -304,20 +349,33 @@
                 max-width: 300px;
             }
         }
+
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 1rem 2rem;
+            }
+
+            .analyzer-container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Navigation Bar -->
     <nav class="navbar">
-        <a href="/" class="logo">
+        <a href="homepage.html" class="logo">
             <i class="fa-regular fa-compass"></i>
             CareerCompass
         </a>
         <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/skills">Skills Assessment</a>
-            <a href="/roadmap">Roadmap</a>
-            <a href="/chatbot">Chatbot</a>
-            <a href="/profile">Profile</a>
+            <a href="homepage.html">Home</a>
+            <a href="roadmap.html">Roadmap</a>
+            <a href="progress_tracker.html">Progress Tracker</a>
+            <a href="resume_comparison.html">Resume Comparison</a>
+            <a href="https://resumake.io/">Resume Preview</a>
+            <a href="chatbot.html">AI Mentor</a>
         </div>
         <div class="hamburger">
             <i class="fas fa-bars"></i>
@@ -384,207 +442,3 @@
     <footer class="footer">
         <p>© 2025 CareerCompass. Navigate your future with confidence.</p>
     </footer>
-
-    <script>
-        const resumeUpload = document.getElementById('resume-upload');
-        const uploadStatus = document.getElementById('upload-status');
-        const results = document.getElementById('results');
-        let resumeText = '';
-
-        // Navbar Toggle
-        const hamburger = document.querySelector('.hamburger');
-        const navLinks = document.querySelector('.nav-links');
-        hamburger.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-            hamburger.querySelector('i').classList.toggle('fa-bars');
-            hamburger.querySelector('i').classList.toggle('fa-times');
-        });
-
-        // Handle File Upload
-        resumeUpload.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            if (file.type === 'application/pdf') {
-                const reader = new FileReader();
-                reader.onload = async function(event) {
-                    const typedArray = new Uint8Array(event.target.result);
-                    const pdf = await pdfjsLib.getDocument(typedArray).promise;
-                    let text = '';
-                    for (let i = 1; i <= pdf.numPages; i++) {
-                        const page = await pdf.getPage(i);
-                        const content = await page.getTextContent();
-                        text += content.items.map(item => item.str).join(' ') + ' ';
-                    }
-                    resumeText = text.trim();
-                    uploadStatus.textContent = `File Uploaded: ${file.name}`;
-                    uploadStatus.classList.add('active');
-                };
-                reader.readAsArrayBuffer(file);
-            } else if (file.type === 'text/plain') {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    resumeText = event.target.result.trim();
-                    uploadStatus.textContent = `File Uploaded: ${file.name}`;
-                    uploadStatus.classList.add('active');
-                };
-                reader.readAsText(file);
-            } else {
-                alert('Please upload a PDF or TXT file.');
-                uploadStatus.textContent = '';
-                uploadStatus.classList.remove('active');
-            }
-        });
-
-        // Analyze Resume
-        async function analyzeResume() {
-            if (!resumeText) {
-                alert('Please upload a resume first.');
-                return;
-            }
-
-            uploadStatus.textContent = 'Analyzing...';
-            uploadStatus.classList.add('active'); // Ensure it's visible during analysis
-            try {
-                const response = await fetch('http://localhost:5000/analyze-resume', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ resume: resumeText })
-                });
-                const data = await response.json();
-
-                if (response.ok) {
-                    displayResults(data);
-                    results.classList.add('active');
-                    results.scrollIntoView({ behavior: 'smooth' });
-                    uploadStatus.textContent = 'Analysis Complete!';
-                } else {
-                    alert('Error: ' + data.error);
-                    uploadStatus.textContent = `File Uploaded: ${resumeUpload.files[0].name}`;
-                }
-            } catch (error) {
-                alert('Server error: ' + error.message);
-                uploadStatus.textContent = `File Uploaded: ${resumeUpload.files[0].name}`;
-            }
-        }
-
-        // Display Results with Charts
-        function displayResults(data) {
-            // Experience Summary
-            document.getElementById('experience-summary').textContent = 
-                `Experience Level: ${data.experience_level.level} (Confidence: ${data.experience_level.confidence}%)`;
-
-            // Skills
-            const skillsList = document.getElementById('skills-list');
-            skillsList.innerHTML = '';
-            data.skills.forEach(skill => {
-                const li = document.createElement('li');
-                li.textContent = skill;
-                skillsList.appendChild(li);
-            });
-
-            const skillsBarChart = new Chart(document.getElementById('skills-bar-chart'), {
-                type: 'bar',
-                data: {
-                    labels: data.skills,
-                    datasets: [{
-                        label: 'Skill Strength (Estimated)',
-                        data: data.skills.map(() => Math.floor(Math.random() * 40) + 60),
-                        backgroundColor: 'rgba(98, 146, 158, 0.7)',
-                        borderColor: 'rgba(98, 146, 158, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: { y: { beginAtZero: true, max: 100 } },
-                    plugins: { legend: { display: false } }
-                }
-            });
-
-            const skillsRadarChart = new Chart(document.getElementById('skills-radar-chart'), {
-                type: 'radar',
-                data: {
-                    labels: data.skills,
-                    datasets: [{
-                        label: 'Skill Balance',
-                        data: data.skills.map(() => Math.floor(Math.random() * 40) + 60),
-                        fill: true,
-                        backgroundColor: 'rgba(98, 146, 158, 0.2)',
-                        borderColor: 'rgba(98, 146, 158, 1)',
-                        pointBackgroundColor: 'rgba(98, 146, 158, 1)',
-                        pointBorderColor: '#fff'
-                    }]
-                },
-                options: {
-                    scales: { r: { beginAtZero: true, max: 100 } }
-                }
-            });
-
-            // Career Options
-            const careerList = document.getElementById('career-options-list');
-            careerList.innerHTML = '';
-            data.career_options.forEach(option => {
-                const li = document.createElement('li');
-                li.textContent = `${option.name} (Fit: ${option.fit}%) - ${option.reason}`;
-                careerList.appendChild(li);
-            });
-
-            const careerPieChart = new Chart(document.getElementById('career-pie-chart'), {
-                type: 'pie',
-                data: {
-                    labels: data.career_options.map(opt => opt.name),
-                    datasets: [{
-                        data: data.career_options.map(opt => opt.fit),
-                        backgroundColor: ['#62929E', '#4A6D7C', '#FFD700', '#393A10']
-                    }]
-                },
-                options: {
-                    plugins: { legend: { position: 'bottom' } }
-                }
-            });
-
-            const careerDonutChart = new Chart(document.getElementById('career-donut-chart'), {
-                type: 'doughnut',
-                data: {
-                    labels: data.career_options.map(opt => opt.name),
-                    datasets: [{
-                        data: data.career_options.map(opt => opt.fit),
-                        backgroundColor: ['#62929E', '#4A6D7C', '#FFD700', '#393A10']
-                    }]
-                },
-                options: {
-                    cutout: '50%',
-                    plugins: { legend: { position: 'bottom' } }
-                }
-            });
-
-            // Strengths
-            const strengthsList = document.getElementById('strengths-list');
-            strengthsList.innerHTML = '';
-            data.strengths.forEach(strength => {
-                const li = document.createElement('li');
-                li.textContent = strength;
-                strengthsList.appendChild(li);
-            });
-
-            // Weaknesses
-            const weaknessesList = document.getElementById('weaknesses-list');
-            weaknessesList.innerHTML = '';
-            data.weaknesses.forEach(weakness => {
-                const li = document.createElement('li');
-                li.textContent = weakness;
-                weaknessesList.appendChild(li);
-            });
-
-            // Improvements
-            const improvementsList = document.getElementById('improvements-list');
-            improvementsList.innerHTML = '';
-            data.improvements.forEach(improvement => {
-                const li = document.createElement('li');
-                li.textContent = improvement;
-                improvementsList.appendChild(li);
-            });
-        }
-    </script>
-</body>
-</html>

@@ -37,16 +37,18 @@
             min-height: 100vh;
         }
 
+        /* Navbar */
         .navbar {
             background: linear-gradient(90deg, var(--dark-teal), var(--teal));
-            padding: 1.5rem 4rem;
+            padding: 1.8rem 5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
             position: sticky;
             top: 0;
             z-index: 1000;
+            backdrop-filter: blur(5px);
         }
 
         .navbar .logo {
@@ -54,34 +56,69 @@
             align-items: center;
             color: var(--light-gray);
             font-family: 'Playfair Display', serif;
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             font-weight: 900;
             text-decoration: none;
+            transition: all 0.4s ease;
+        }
+
+        .navbar .logo:hover {
+            transform: scale(1.1) rotate(5deg);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
         }
 
         .navbar .logo i {
-            margin-right: 0.8rem;
-            font-size: 2rem;
-            animation: spinCompass 15s linear infinite;
+            margin-right: 1rem;
+            font-size: 2.2rem;
+            animation: spinCompass 10s linear infinite;
+        }
+
+        .navbar .nav-links {
+            display: flex;
+            align-items: center;
         }
 
         .navbar .nav-links a {
             color: var(--light-gray);
-            margin-left: 2.5rem;
+            margin-left: 3rem;
             text-decoration: none;
-            font-size: 1.1rem;
-            transition: color 0.3s ease;
+            font-size: 1.2rem;
+            font-weight: 400;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .navbar .nav-links a::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 3px;
+            bottom: -8px;
+            left: 0;
+            background: linear-gradient(90deg, var(--teal), var(--light-gray));
+            transition: width 0.4s ease;
+        }
+
+        .navbar .nav-links a:hover::before {
+            width: 100%;
         }
 
         .navbar .nav-links a:hover {
-            color: var(--accent);
+            color: var(--light-gray);
+            text-shadow: 0 0 10px var(--teal);
+            transform: translateY(-2px);
         }
 
         .hamburger {
             display: none;
-            font-size: 1.8rem;
+            font-size: 2rem;
             color: var(--light-gray);
             cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .hamburger:hover {
+            transform: rotate(90deg);
         }
 
         main {
@@ -231,19 +268,27 @@
 
         @media (max-width: 768px) {
             .navbar {
-                padding: 1rem 2rem;
+                padding: 1.5rem 3rem;
+                flex-wrap: wrap;
             }
 
             .navbar .nav-links {
                 display: none;
                 flex-direction: column;
                 width: 100%;
+                margin-top: 1rem;
                 background: var(--dark-teal);
                 padding: 1rem;
+                border-radius: 10px;
             }
 
             .navbar .nav-links.active {
                 display: flex;
+            }
+
+            .navbar .nav-links a {
+                margin: 0.5rem 0;
+                font-size: 1.1rem;
             }
 
             .hamburger {
@@ -268,17 +313,19 @@
     </style>
 </head>
 <body>
+    <!-- Navigation Bar -->
     <nav class="navbar">
-        <a href="/" class="logo">
+        <a href="homepage.html" class="logo">
             <i class="fa-regular fa-compass"></i>
             CareerCompass
         </a>
         <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/skills">Skills Assessment</a>
-            <a href="/roadmap">Roadmap</a>
-            <a href="/resume_analyzer.html">Resume Analyzer</a>
-            <a href="/progress_tracker.html">Progress Tracker</a>
+            <a href="homepage.html">Home</a>
+            <a href="roadmap.html">Roadmap</a>
+            <a href="resume_analyzer.html">Resume Analyzer</a>
+            <a href="resume_comparison.html">Resume Comparison</a>
+            <a href="https://resumake.io/">Resume Preview</a>
+            <a href="chatbot.html">AI Mentor</a>
         </div>
         <div class="hamburger">
             <i class="fas fa-bars"></i>
@@ -328,6 +375,21 @@
             navLinks.classList.toggle('active');
             hamburger.querySelector('i').classList.toggle('fa-bars');
             hamburger.querySelector('i').classList.toggle('fa-times');
+        });
+
+        // Smooth Scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+                if (window.innerWidth <= 768) {
+                    navLinks.classList.remove('active');
+                    hamburger.querySelector('i').classList.add('fa-bars');
+                    hamburger.querySelector('i').classList.remove('fa-times');
+                }
+            });
         });
 
         // Track Progress

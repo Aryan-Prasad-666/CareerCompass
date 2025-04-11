@@ -50,13 +50,7 @@
             font-size: 2.5rem;
             font-weight: 900;
             text-decoration: none;
-            /* transition: all 0.4s ease; */
         }
-
-        /* .navbar .logo:hover {
-            transform: scale(1.1) rotate(5deg);
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
-        } */
 
         .navbar .logo i {
             margin-right: 1rem;
@@ -385,6 +379,46 @@
             animation: gradientFlow 5s linear infinite;
         }
 
+        /* Floating Chatbot Button */
+        .chatbot-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, var(--dark-green), var(--teal));
+            border: none;
+            border-radius: 50%;
+            color: var(--light-gray);
+            font-size: 1.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+
+        .chatbot-button:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Jumping Animation for Chatbot Icon */
+        .chatbot-button i {
+            animation: jump 1.5s ease-in-out infinite;
+        }
+
+        @keyframes jump {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
         /* Animations */
         @keyframes fadeInDown {
             from { opacity: 0; transform: translateY(-40px); }
@@ -467,6 +501,14 @@
             .user-profile .profile-pic {
                 margin: 2rem 0;
             }
+
+            .chatbot-button {
+                bottom: 1.5rem;
+                right: 1.5rem;
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -485,22 +527,31 @@
             .hero h1 {
                 font-size: 2.5rem;
             }
+
+            .chatbot-button {
+                bottom: 1rem;
+                right: 1rem;
+                width: 45px;
+                height: 45px;
+                font-size: 1.3rem;
+            }
         }
     </style>
 </head>
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar">
-        <a href="#" class="logo">
+        <a href="index.html" class="logo">
             <i class="fa-regular fa-compass"></i>
             CareerCompass
         </a>
         <div class="nav-links">
-            <a href="#home">Home</a>
-            <a href="#skills">Skills Assessment</a>
-            <a href="#roadmap">Roadmap</a>
-            <a href="#resources">Resources</a>
-            <a href="#profile">Profile</a>
+            <a href="roadmap.html">Roadmap</a>
+            <a href="resume_analyzer.html">Resume Analyzer</a>
+            <a href="progress_tracker.html">Progress Tracker</a>
+            <a href="resume_comparison.html">Resume Comparison</a>
+            <a href="https://resumake.io/">Resume Preview</a>
+            <a href="chatbot.html">AI Mentor</a>
         </div>
         <div class="hamburger">
             <i class="fas fa-bars"></i>
@@ -518,7 +569,7 @@
     </section>
 
     <!-- User Profile Section -->
-    <section class="user-profile" data-tilt>
+    <!-- <section class="user-profile" data-tilt>
         <div class="profile-pic">
             <img src="https://via.placeholder.com/180" alt="User Profile Photo">
         </div>
@@ -530,7 +581,7 @@
             <p><strong>Last Active:</strong> April 10, 2025</p>
             <a href="#edit-profile" class="edit-profile">Edit Profile</a>
         </div>
-    </section>
+    </section> -->
 
     <!-- Dashboard Section -->
     <section class="dashboard">
@@ -565,6 +616,11 @@
     <footer class="footer">
         <p>© 2025 CareerCompass. Your guide to every career horizon.</p>
     </footer>
+
+    <!-- Floating Chatbot Button -->
+    <button class="chatbot-button" onclick="openChatbot()">
+        <i class="fa-solid fa-robot"></i>
+    </button>
 
     <!-- JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
@@ -669,7 +725,7 @@
                 if (entry.isIntersecting) {
                     entry.target.style.opacity = '1';
                     entry.target.style.transform = 'translateY(0) scale(1)';
-                    entry.target.style.transitionDelay = `${index * 0.15}s`;
+                    entry.target.style.transitionDelay = `${index * 0.15}s`; // Fixed template literal syntax
                 }
             });
         }, { threshold: 0.3 });
@@ -680,6 +736,11 @@
             card.style.transition = 'all 0.7s ease';
             observer.observe(card);
         });
+
+        // Chatbot Function (Placeholder)
+        function openChatbot() {
+            window.location.href = "chatbot.html"; // Example redirect to chatbot page
+        }
     </script>
 </body>
 </html>
