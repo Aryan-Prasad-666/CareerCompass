@@ -4,7 +4,7 @@ A comprehensive Flask-based web application that leverages Google's Gemini AI to
 
 This website is launched at: https://careercompass.pythonanywhere.com/ 
 
-## Tech Stack Used:-
+## Tech Stack Used
 - Python
 - Flask
 - Html
@@ -12,9 +12,19 @@ This website is launched at: https://careercompass.pythonanywhere.com/
 - Javascript
 - Gemini API
 
+## Description
+
+CareerCompass is an AI-powered platform that generates personalized career roadmaps with interactive timelines, offers peer resume comparison, creates tailored resumes, analyzes resume effectiveness, and provides progress tracking and AI mentorship to guide users toward their dream careers.
+
+## Homepage:
+![screencapture-careercompass-pythonanywhere-2025-04-12-08_17_53](https://github.com/user-attachments/assets/2848b11d-c561-43bf-8923-b5e98090d887)
+
 ## Features
 
 - **Career Roadmap Generator**: Creates personalized career development paths based on user goals and current skills
+  
+  ![screencapture-careercompass-pythonanywhere-roadmap-2025-04-12-08_21_51](https://github.com/user-attachments/assets/2eba9b07-dcdb-4244-9070-97194590462c)
+
 - **Resume Analyzer**: Evaluates resumes and provides detailed feedback and suggestions
 - **Progress Tracker**: Monitors and scores weekly career development achievements
 - **Resume Comparison**: Compares two resumes and provides detailed insights
