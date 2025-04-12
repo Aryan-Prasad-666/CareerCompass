@@ -24,8 +24,8 @@ This website is launched at: https://careercompass.pythonanywhere.com/
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd <project-directory>
+git clone https://github.com/Aryan-Prasad-666/CareerCompass.git
+cd CareerCompass
 ```
 
 2. Install required dependencies:
