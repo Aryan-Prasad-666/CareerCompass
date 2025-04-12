@@ -2,6 +2,8 @@
 
 A comprehensive Flask-based web application that leverages Google's Gemini AI to provide career development tools and guidance.
 
+This website is launched at: https://careercompass.pythonanywhere.com/ 
+
 ## Features
 
 - **Career Roadmap Generator**: Creates personalized career development paths based on user goals and current skills
