@@ -1,23 +1,43 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-from dotenv import load_dotenv
 import google.generativeai as genai
 import json
 import re
-import os
-
-# Load environment variables from .env
-load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-# Get the Gemini API key from environment variables
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+# Hardcode the Gemini API key
+GEMINI_API_KEY = "AIzaSyC091ugGr5LmRqVhqtGzD6WVbndIMuASSE"
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-2.0-flash")
 
+# Template Routes
+@app.route('/')
+def home():
+    return render_template('homepage.html')
 
+@app.route('/roadmap')
+def roadmap():
+    return render_template('roadmap.html')
+
+@app.route('/resume-analyzer')
+def resume_analyzer():
+    return render_template('resume_analyzer.html')
+
+@app.route('/progress-tracker')
+def progress_tracker():
+    return render_template('progress_tracker.html')
+
+@app.route('/resume-comparison')
+def resume_comparison():
+    return render_template('resume_comparison.html')
+
+@app.route('/chatbot')
+def chatbot():
+    return render_template('chatbot.html')
+
+# API Endpoints
 @app.route('/generate-roadmap', methods=['POST'])
 def generate_roadmap():
     data = request.get_json()
@@ -54,7 +74,7 @@ def generate_roadmap():
     try:
         response = model.generate_content(prompt)
         raw_response = response.text
-        print("Raw Gemini Response:", raw_response)  # Debug output to terminal
+        print("Raw Gemini Response:", raw_response)
 
         json_match = re.search(r'\[.*\]', raw_response, re.DOTALL)
         if json_match:
@@ -77,7 +97,7 @@ def generate_roadmap():
         return jsonify(roadmap)
 
     except Exception as e:
-        print("Error:", str(e))  # Log error to terminal
+        print("Error:", str(e))
         mock_roadmap = [
             {
                 "milestone": f"Start Your {career_goal} Journey",
@@ -101,7 +121,7 @@ def generate_roadmap():
             }
         ]
         return jsonify(mock_roadmap), 200
-    
+
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.get_json()
@@ -125,7 +145,7 @@ def chat():
     except Exception as e:
         print("Error (Chat):", str(e))
         return jsonify({"response": "- Sorry, I couldn’t process that.\n- Try asking again!"}), 200
-    
+
 @app.route('/analyze-resume', methods=['POST'])
 def analyze_resume():
     data = request.get_json()
@@ -196,7 +216,7 @@ def analyze_resume():
             "experience_level": {"level": "Entry", "confidence": 80}
         }
         return jsonify(mock_analysis), 200
-    
+
 progress_history = []
 
 @app.route('/track-progress', methods=['POST'])
@@ -274,7 +294,7 @@ def track_progress():
             "current": mock_progress,
             "history": progress_history
         }), 200
-    
+
 @app.route('/compare-resumes', methods=['POST'])
 def compare_resumes():
     data = request.get_json()
@@ -341,6 +361,6 @@ def compare_resumes():
             ]
         }
         return jsonify(mock_comparison), 200
-      
+
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

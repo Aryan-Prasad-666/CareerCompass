@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CareerCompass - Progress Tracker</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;600;800&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;600;800&family=Playfair+Display:wght@400;700;900&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -25,7 +28,8 @@
             font-family: 'Poppins', sans-serif;
         }
 
-        html, body {
+        html,
+        body {
             height: 100%;
         }
 
@@ -38,17 +42,25 @@
         }
 
         /* Navbar */
+        /* Navbar */
         .navbar {
             background: linear-gradient(90deg, var(--dark-teal), var(--teal));
-            padding: 1.8rem 5rem;
+            padding: 1rem 4%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
             position: sticky;
             top: 0;
             z-index: 1000;
-            backdrop-filter: blur(5px);
+            transition: padding 0.3s ease, background 0.3s ease;
+            width: 100%;
+        }
+
+        .navbar.scrolled {
+            padding: 0.7rem 4%;
+            background: linear-gradient(90deg, var(--dark-teal), var(--teal));
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25);
         }
 
         .navbar .logo {
@@ -56,47 +68,54 @@
             align-items: center;
             color: var(--light-gray);
             font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 900;
             text-decoration: none;
-            transition: all 0.4s ease;
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+            margin-right: 1.5rem;
         }
 
         .navbar .logo:hover {
-            transform: scale(1.1) rotate(5deg);
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+            transform: scale(1.05);
         }
 
         .navbar .logo i {
-            margin-right: 1rem;
-            font-size: 2.2rem;
-            animation: spinCompass 10s linear infinite;
+            margin-right: 0.6rem;
+            font-size: 1.7rem;
+            animation: spinCompass 15s linear infinite;
         }
 
         .navbar .nav-links {
             display: flex;
             align-items: center;
+            gap: 1.8rem;
+            flex-grow: 1;
+            flex-wrap: nowrap;
+            justify-content: flex-end;
         }
 
         .navbar .nav-links a {
             color: var(--light-gray);
-            margin-left: 3rem;
             text-decoration: none;
-            font-size: 1.2rem;
-            font-weight: 400;
+            font-size: 1rem;
+            font-weight: 500;
             position: relative;
-            transition: all 0.3s ease;
+            padding: 0.5rem 0;
+            transition: color 0.3s ease, transform 0.3s ease;
+            white-space: nowrap;
+            display: inline-block;
         }
 
         .navbar .nav-links a::before {
             content: '';
             position: absolute;
             width: 0;
-            height: 3px;
-            bottom: -8px;
+            height: 2px;
+            bottom: 0;
             left: 0;
-            background: linear-gradient(90deg, var(--teal), var(--light-gray));
-            transition: width 0.4s ease;
+            background: linear-gradient(90deg, var(--light-gray), var(--white));
+            transition: width 0.3s ease;
         }
 
         .navbar .nav-links a:hover::before {
@@ -104,8 +123,7 @@
         }
 
         .navbar .nav-links a:hover {
-            color: var(--light-gray);
-            text-shadow: 0 0 10px var(--teal);
+            color: var(--white);
             transform: translateY(-2px);
         }
 
@@ -119,6 +137,87 @@
 
         .hamburger:hover {
             transform: rotate(90deg);
+        }
+
+        /* Updated responsive design for the navbar */
+        @media (max-width: 1200px) {
+            .navbar {
+                padding: 1rem 3%;
+            }
+
+            .navbar .logo {
+                font-size: 1.8rem;
+            }
+
+            .navbar .nav-links {
+                gap: 1.5rem;
+            }
+
+            .navbar .nav-links a {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .navbar {
+                padding: 1rem 2%;
+            }
+
+            .navbar .nav-links {
+                gap: 1.2rem;
+            }
+
+            .navbar .logo {
+                font-size: 1.7rem;
+            }
+
+            .navbar .nav-links a {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 850px) {
+            .navbar {
+                padding: 1rem 2rem;
+                flex-wrap: wrap;
+            }
+
+            .navbar .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                margin-top: 1rem;
+                background: var(--dark-teal);
+                padding: 1.5rem;
+                border-radius: 10px;
+                gap: 1.5rem;
+            }
+
+            .navbar .nav-links.active {
+                display: flex;
+            }
+
+            .navbar .nav-links a {
+                font-size: 1.1rem;
+            }
+
+            .hamburger {
+                display: block;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 0.8rem 1rem;
+            }
+
+            .navbar .logo {
+                font-size: 1.6rem;
+            }
+
+            .navbar .logo i {
+                font-size: 1.4rem;
+            }
         }
 
         main {
@@ -256,14 +355,104 @@
         .footer {
             background: linear-gradient(90deg, var(--dark-green), var(--charcoal));
             color: var(--light-gray);
+            padding: 4rem 5rem;
+            margin-top: 5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--teal), var(--light-gray));
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 3rem;
+            text-align: left;
+        }
+
+        .footer-content .footer-brand h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--white);
+        }
+
+        .footer-content .footer-brand p {
+            font-size: 1rem;
+            font-weight: 300;
+            color: var(--light-gray);
+        }
+
+        .footer-content .footer-links h4,
+        .footer-content .footer-social h4 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--white);
+        }
+
+        .footer-content .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-content .footer-links ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-content .footer-links ul li a {
+            color: var(--light-gray);
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .footer-content .footer-links ul li a:hover {
+            color: var(--white);
+            transform: translateX(5px);
+        }
+
+        .footer-content .footer-social .social-icons {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-content .footer-social .social-icons a {
+            color: var(--light-gray);
+            font-size: 1.5rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .footer-content .footer-social .social-icons a:hover {
+            color: var(--white);
+            transform: scale(1.2);
+        }
+
+        .footer-bottom {
             text-align: center;
-            padding: 2rem;
-            flex-shrink: 0;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.95rem;
+            color: var(--light-gray);
         }
 
         @keyframes spinCompass {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         @media (max-width: 768px) {
@@ -312,20 +501,21 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar">
-        <a href="homepage.html" class="logo">
+        <a href="/" class="logo">
             <i class="fa-regular fa-compass"></i>
             CareerCompass
         </a>
         <div class="nav-links">
-            <a href="homepage.html">Home</a>
-            <a href="roadmap.html">Roadmap</a>
-            <a href="resume_analyzer.html">Resume Analyzer</a>
-            <a href="resume_comparison.html">Resume Comparison</a>
-            <a href="https://resumake.io/">Resume Preview</a>
-            <a href="chatbot.html">AI Mentor</a>
+            <a href="/">Home</a>
+            <a href="/roadmap">Roadmap</a>
+            <a href="/resume-analyzer">Resume Analyzer</a>
+            <a href="/resume-comparison">Resume Comparison</a>
+            <a href="https://careercompassresume.pythonanywhere.com/">Resume Builder</a>
+            <a href="/chatbot">AI Mentor</a>
         </div>
         <div class="hamburger">
             <i class="fas fa-bars"></i>
@@ -339,7 +529,8 @@
                 <p>Track your weekly achievements and get tailored suggestions!</p>
             </div>
             <div class="input-area">
-                <textarea id="achievements" placeholder="Enter your weekly achievements (e.g., 'Learned Python basics, completed a small project')"></textarea>
+                <textarea id="achievements"
+                    placeholder="Enter your weekly achievements (e.g., 'Learned Python basics, completed a small project')"></textarea>
                 <button class="submit-btn" onclick="trackProgress()">Submit</button>
                 <div class="progress-status" id="progress-status"></div>
             </div>
@@ -359,7 +550,9 @@
     </main>
 
     <footer class="footer">
-        <p>© 2025 CareerCompass. Navigate your future with confidence.</p>
+        <p>Designed and Developed by <strong>Team SCAR</strong></p>
+        <p><strong>Aryan, Prajwal, Keerthana, Lakki</strong></p>
+        <p>© 2025 CareerCompass. Your guide to every career horizon.</p>
     </footer>
 
     <script>
@@ -404,7 +597,7 @@
             progressStatus.classList.add('active');
 
             try {
-                const response = await fetch('http://localhost:5000/track-progress', {
+                const response = await fetch('https://careercompass.pythonanywhere.com/track-progress', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ achievements })
@@ -470,4 +663,5 @@
         }
     </script>
 </body>
+
 </html>
