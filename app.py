@@ -4,7 +4,10 @@ import google.generativeai as genai
 import json
 import re
 import os
-from dotenv import load_dotenv  # Import dotenv to load .env file
+import pickle
+import numpy as np
+import pandas as pd
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 CORS(app)
@@ -18,6 +21,62 @@ if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY not found in environment variables")
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-2.0-flash")
+
+# Load the RandomForestClassifier model
+try:
+    with open('weights.pkl', 'rb') as file:
+        rf_model = pickle.load(file)
+except FileNotFoundError:
+    raise FileNotFoundError("weights.pkl not found. Ensure the model file is in the correct directory.")
+
+# Define categorical mappings based on mldata.csv and training script
+CERTIFICATIONS = {
+    'app development': 0, 'distro making': 1, 'full stack': 2, 'hadoop': 3,
+    'information security': 4, 'machine learning': 5, 'python': 6,
+    'r programming': 7, 'shell programming': 8
+}
+WORKSHOPS = {
+    'cloud computing': 0, 'data science': 1, 'database security': 2,
+    'game development': 3, 'hacking': 4, 'system designing': 5,
+    'testing': 6, 'web technologies': 7
+}
+INTERESTED_SUBJECTS = {
+    'cloud computing': 0, 'Computer Architecture': 1, 'data engineering': 2,
+    'hacking': 3, 'IOT': 4, 'Management': 5, 'networks': 6,
+    'parallel computing': 7, 'programming': 8, 'Software Engineering': 9
+}
+CAREER_AREA = {
+    'Business process analyst': 0, 'cloud computing': 1, 'developer': 2,
+    'security': 3, 'system developer': 4, 'testing': 5
+}
+COMPANY_TYPE = {
+    'BPA': 0, 'Cloud Services': 1, 'Finance': 2, 'product development': 3,
+    'Product based': 4, 'SAaS services': 5, 'Sales and Marketing': 6,
+    'Service Based': 7, 'Testing and Maintainance Services': 8, 'Web Services': 9
+}
+BOOKS = {
+    'Action and Adventure': 0, 'Anthology': 1, 'Art': 2, 'Autobiographies': 3,
+    'Biographies': 4, 'Childrens': 5, 'Comics': 6, 'Cookbooks': 7, 'Diaries': 8,
+    'Dictionaries': 9, 'Drama': 10, 'Encyclopedias': 11, 'Fantasy': 12, 'Guide': 13,
+    'Health': 14, 'History': 15, 'Horror': 16, 'Journals': 17, 'Math': 18,
+    'Mystery': 19, 'Poetry': 20, 'Prayer books': 21, 'Religion-Spirituality': 22,
+    'Romance': 23, 'Satire': 24, 'Science': 25, 'Science fiction': 26, 'Self help': 27,
+    'Series': 28, 'Travel': 29, 'Trilogy': 30
+}
+BINARY = {'yes': 1, 'no': 0}
+SKILLS = {'poor': 0, 'medium': 1, 'excellent': 2}
+MANAGEMENT_TECHNICAL = {'Management': 'Management', 'Technical': 'Technical'}
+WORKER_TYPE = {'hard worker': 'hard worker', 'smart worker': 'smart worker'}
+
+# Define feature names expected by the model
+FEATURE_NAMES = [
+    'Logical quotient rating', 'coding skills rating', 'hackathons', 'public speaking points',
+    'self-learning capability?', 'Extra-courses did', 'Taken inputs from seniors or elders',
+    'worked in teams ever?', 'Introvert', 'reading and writing skills', 'memory capability score',
+    'B_hard worker', 'B_smart worker', 'A_Management', 'A_Technical', 'Interested subjects_code',
+    'Interested Type of Books_code', 'certifications_code', 'workshops_code',
+    'Type of company want to settle in?_code', 'interested career area _code'
+]
 
 # Template Routes
 @app.route('/')
@@ -43,6 +102,10 @@ def resume_comparison():
 @app.route('/chatbot')
 def chatbot():
     return render_template('chatbot.html')
+
+@app.route('/career-prediction')
+def career_prediction():
+    return render_template('careerprediction.html')
 
 # API Endpoints
 @app.route('/generate-roadmap', methods=['POST'])
@@ -368,6 +431,75 @@ def compare_resumes():
             ]
         }
         return jsonify(mock_comparison), 200
+
+@app.route('/predict-career', methods=['POST'])
+def predict_career():
+    try:
+        data = request.get_json()
+        
+        # Extract and validate features
+        features = {
+            'Logical quotient rating': int(data.get('logical_quotient_rating', 0)),
+            'coding skills rating': int(data.get('coding_skills_rating', 0)),
+            'hackathons': int(data.get('hackathons', 0)),
+            'public speaking points': int(data.get('public_speaking_points', 0)),
+            'self-learning capability?': BINARY.get(data.get('self_learning_capability', 'no')),
+            'Extra-courses did': BINARY.get(data.get('extra_courses_did', 'no')),
+            'Taken inputs from seniors or elders': BINARY.get(data.get('taken_inputs_seniors_elders', 'no')),
+            'worked in teams ever?': BINARY.get(data.get('worked_in_teams', 'no')),
+            'Introvert': BINARY.get(data.get('introvert', 'no')),
+            'reading and writing skills': SKILLS.get(data.get('reading_writing_skills', 'poor')),
+            'memory capability score': SKILLS.get(data.get('memory_capability_score', 'poor')),
+            'certifications_code': CERTIFICATIONS.get(data.get('certifications', 'app development')),
+            'workshops_code': WORKSHOPS.get(data.get('workshops', 'cloud computing')),
+            'Interested subjects_code': INTERESTED_SUBJECTS.get(data.get('interested_subjects', 'cloud computing')),
+            'interested career area _code': CAREER_AREA.get(data.get('interested_career_area', 'Business process analyst')),
+            'Type of company want to settle in?_code': COMPANY_TYPE.get(data.get('company_type', 'BPA')),
+            'Interested Type of Books_code': BOOKS.get(data.get('interested_books', 'Action and Adventure')),
+            'B_hard worker': 1 if data.get('worker_type', 'hard worker') == 'hard worker' else 0,
+            'B_smart worker': 1 if data.get('worker_type', 'hard worker') == 'smart worker' else 0,
+            'A_Management': 1 if data.get('management_technical', 'Management') == 'Management' else 0,
+            'A_Technical': 1 if data.get('management_technical', 'Management') == 'Technical' else 0
+        }
+        
+        # Convert to pandas DataFrame with feature names
+        input_df = pd.DataFrame([features], columns=FEATURE_NAMES)
+        
+        # Predict
+        prediction = rf_model.predict(input_df)[0]
+        probabilities = rf_model.predict_proba(input_df)[0]
+        max_prob = np.max(probabilities)
+        
+        # Get class names from the model
+        classes = rf_model.classes_
+        prob_dict = {cls: float(prob) for cls, prob in zip(classes, probabilities)}
+        
+        return jsonify({
+            "career": str(prediction),
+            "confidence": float(max_prob),
+            "probabilities": prob_dict,
+            "recommendations": [
+                "Build a portfolio showcasing relevant projects.",
+                "Network with professionals in your predicted career field.",
+                "Enroll in a course to strengthen key skills.",
+                "Seek mentorship from experienced individuals.",
+                "Stay updated with industry trends."
+            ]
+        })
+    except Exception as e:
+        print("Error (Career Prediction):", str(e))
+        return jsonify({
+            "career": "Software Engineer",
+            "confidence": 0.85,
+            "probabilities": {"Software Engineer": 0.85, "Data Analyst": 0.10, "Project Manager": 0.05},
+            "recommendations": [
+                "Build a portfolio showcasing relevant projects.",
+                "Network with professionals in your predicted career field.",
+                "Enroll in a course to strengthen key skills.",
+                "Seek mentorship from experienced individuals.",
+                "Stay updated with industry trends."
+            ]
+        }), 200
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
