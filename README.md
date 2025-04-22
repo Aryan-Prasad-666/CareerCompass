@@ -1,6 +1,6 @@
 # Career Development Assistant📃
 
-A comprehensive Flask-based web application that leverages Google's Gemini AI to provide career development tools and guidance.
+CareerCompass is an AI-powered platform that generates personalized career roadmaps with interactive timelines, offers peer resume comparison, creates tailored resumes, analyzes resume effectiveness, and provides progress tracking and AI mentorship to guide users toward their dream careers.
 
 This website is launched at: https://careercompass.pythonanywhere.com/ 
 
